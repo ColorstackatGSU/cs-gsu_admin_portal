@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { API_URL } from './env';
 
 /**
  * The one place we call the Spring API. Attaches the current Supabase access
@@ -12,13 +13,10 @@ import { supabase } from './supabase';
  * session that survived a Supabase project rotation, or a refresh that failed
  * silently. The handler signs out and redirects, so the tab does not sit there
  * showing spinners against an API that will keep 401ing forever.
+ *
+ * API_URL comes from lib/env, which does not throw on a missing var: main.tsx
+ * renders the setup screen instead, so nothing here ever runs unconfigured.
  */
-
-const API_URL = import.meta.env.VITE_API_URL;
-
-if (!API_URL) {
-  throw new Error('VITE_API_URL must be set. Copy .env.example to .env.local and fill it in.');
-}
 
 export class ApiError extends Error {
   // Explicit fields rather than parameter-property shorthand: tsconfig's
@@ -47,7 +45,9 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   if (session?.access_token) {
     headers.set('Authorization', `Bearer ${session.access_token}`);
   }
-  if (init.body && !headers.has('Content-Type')) {
+  // FormData must set its own Content-Type so fetch can add the multipart
+  // boundary. Only JSON bodies get the header from us.
+  if (init.body && !(init.body instanceof FormData) && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json');
   }
 
@@ -65,15 +65,22 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     if (res.status === 401 && session?.access_token) {
       // We sent a token and the server rejected it. Fire and forget the sign
       // out so we do not chain broken calls in this tab, and bounce to /login
-      // with the current path so the sponsor lands back where they started.
+      // with the current path so the officer lands back where they started.
       void handleUnauthorized();
     }
     throw new ApiError(res.status, body, `${res.status} ${res.statusText}`);
   }
 
-  // 204 has no body; typing it as T is the caller's problem.
+  // Some admin endpoints return no body at all on success. Spring's void
+  // handlers (POST /admin/unmatched-payments/{id}/dismiss) answer 200 with
+  // zero bytes, not 204, so checking for 204 alone is not enough: res.json()
+  // on an empty body throws a SyntaxError and a successful dismiss surfaced
+  // as an error toast. Read the text once and only parse when there is
+  // something to parse.
   if (res.status === 204) return undefined as T;
-  return res.json() as Promise<T>;
+  const text = await res.text();
+  if (!text) return undefined as T;
+  return JSON.parse(text) as T;
 }
 
 /**
@@ -82,8 +89,8 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
  * queue multiple redirects.
  *
  * Uses window.location, not react-router, because api.ts is imported from
- * hooks that live outside the router context — we would need to plumb the
- * navigator through every hook to use it, and this is a rare error path.
+ * modules that live outside the router context — we would need to plumb the
+ * navigator through every one to use it, and this is a rare error path.
  */
 let redirecting = false;
 async function handleUnauthorized(): Promise<void> {
