@@ -30,6 +30,9 @@ export type Sponsor = {
   tierName: string | null;
   websiteUrl: string | null;
   status: SponsorStatus;
+  /** Short-lived signed URL to the sponsor's uploaded logo, or null.
+   *  Re-signed by the backend on every /admin/sponsors/:id load. */
+  logoUrl: string | null;
 };
 
 export type Contact = {

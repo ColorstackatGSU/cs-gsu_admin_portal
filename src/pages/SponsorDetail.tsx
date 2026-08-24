@@ -156,6 +156,14 @@ export default function SponsorDetail() {
 
       <header className="detail-head">
         <div>
+          {s.logoUrl && (
+            <img
+              className="sponsor-logo-preview"
+              src={s.logoUrl}
+              alt={`${s.name} logo`}
+              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+            />
+          )}
           <h1>{s.name}</h1>
           <div className="detail-meta">
             <SponsorPill status={s.status} />

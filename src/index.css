@@ -1081,3 +1081,85 @@ select.input:focus {
   }
   .side { transition: none !important; }
 }
+
+/* ==========================================================================
+   Rich text editor (RichTextEditor.tsx)
+   ==========================================================================*/
+
+.rte {
+  border: 2px solid var(--ink, #14110D);
+  background: #fff;
+  box-shadow: 3px 3px 0 var(--ink, #14110D);
+}
+.rte-toolbar {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 6px 8px;
+  border-bottom: 2px solid var(--ink, #14110D);
+  background: #f9fafb;
+}
+.rte-btn {
+  min-width: 30px;
+  height: 30px;
+  padding: 0 8px;
+  background: #fff;
+  border: 1px solid #14110D;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  font-family: inherit;
+}
+.rte-btn:hover { background: #FFF8DC; }
+.rte-select {
+  height: 30px;
+  padding: 0 6px;
+  background: #fff;
+  border: 1px solid #14110D;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+}
+.rte-divider {
+  width: 1px;
+  height: 22px;
+  background: #14110D;
+  opacity: 0.3;
+  margin: 0 4px;
+}
+.rte-editor {
+  min-height: 260px;
+  padding: 16px 18px;
+  outline: none;
+  font-size: 15px;
+  line-height: 1.55;
+  color: #091024;
+  overflow-y: auto;
+  max-height: 480px;
+}
+.rte-editor:empty::before {
+  content: attr(data-placeholder);
+  color: #9ca3af;
+  pointer-events: none;
+}
+.rte-editor h2 { font-size: 22px; margin: 12px 0 8px; font-weight: 700; }
+.rte-editor h3 { font-size: 18px; margin: 10px 0 6px; font-weight: 600; }
+.rte-editor p { margin: 0 0 10px; }
+.rte-editor ul, .rte-editor ol { margin: 0 0 10px; padding-left: 22px; }
+.rte-editor a { color: #0039A6; text-decoration: underline; }
+
+/* Sponsor logo on the sponsor detail page */
+.sponsor-logo-preview {
+  display: block;
+  max-width: 140px;
+  max-height: 100px;
+  object-fit: contain;
+  background: #fff;
+  padding: 8px 10px;
+  border: 2px solid var(--ink, #14110D);
+  box-shadow: 3px 3px 0 var(--ink, #14110D);
+  margin-bottom: 12px;
+}
