@@ -42,9 +42,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function completeGrant(grant: SessionGrant) {
+    // supabase-js refuses if `email` is passed alongside `token_hash`:
+    // the token_hash form identifies the user itself and adding the email
+    // is treated as ambiguous input. Send only what the token_hash flow
+    // wants — the type discriminator and the hash — and let GoTrue derive
+    // the identity from the hash.
     const { error } = await supabase.auth.verifyOtp({
       type: 'magiclink',
-      email: grant.email,
       token_hash: grant.tokenHash,
     });
     if (error) throw error;
