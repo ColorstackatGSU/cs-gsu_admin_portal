@@ -10,6 +10,8 @@ import InvoiceDetail from './pages/InvoiceDetail';
 import UnmatchedPayments from './pages/UnmatchedPayments';
 import Members from './pages/Members';
 import MemberDetail from './pages/MemberDetail';
+import MemberEmail from './pages/MemberEmail';
+import SponsorView from './pages/SponsorView';
 import NotFound from './pages/NotFound';
 
 /**
@@ -31,12 +33,14 @@ export default function App() {
 
         <Route path="sponsors" element={<ProtectedRoute><Sponsors /></ProtectedRoute>} />
         <Route path="sponsors/:id" element={<ProtectedRoute><SponsorDetail /></ProtectedRoute>} />
+        <Route path="sponsors/:id/view" element={<ProtectedRoute><SponsorView /></ProtectedRoute>} />
         <Route path="invoices" element={<ProtectedRoute><Invoices /></ProtectedRoute>} />
         <Route path="invoices/new" element={<ProtectedRoute><InvoiceNew /></ProtectedRoute>} />
         <Route path="invoices/:id" element={<ProtectedRoute><InvoiceDetail /></ProtectedRoute>} />
         <Route path="unmatched" element={<ProtectedRoute><UnmatchedPayments /></ProtectedRoute>} />
         <Route path="members" element={<ProtectedRoute><Members /></ProtectedRoute>} />
         <Route path="members/:id" element={<ProtectedRoute><MemberDetail /></ProtectedRoute>} />
+        <Route path="members/email" element={<ProtectedRoute><MemberEmail /></ProtectedRoute>} />
 
         <Route path="*" element={<NotFound />} />
       </Route>

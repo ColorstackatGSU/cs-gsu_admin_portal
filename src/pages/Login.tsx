@@ -16,17 +16,10 @@ import { ORG } from '../data/org';
  * The step count is on screen because you have to leave the page to fetch the
  * code, and a form that has changed under you when you come back needs to have
  * said it would.
- *
- * Dev sign-in only renders in a dev build. The endpoint itself is gated by
- * `app.admin.dev-auto-login` on the backend and 404s when that is off, but a
- * one-click "sign in as the chapter's main account" button has no business
- * being painted onto a production login screen at all.
  */
-const DEV_EMAIL = 'official@colorstackatgsu.com';
-const SHOW_DEV_LOGIN = import.meta.env.DEV;
 
 export default function Login() {
-  const { user, requestCode, verifyCode, devLogin } = useAuth();
+  const { user, requestCode, verifyCode } = useAuth();
   const nav = useNavigate();
   const location = useLocation();
   const [search] = useSearchParams();
@@ -46,19 +39,6 @@ export default function Login() {
   // is almost always a stale back-button, and rendering the form would let
   // someone sign in as a second account without signing out of the first.
   if (user) return <Navigate to={from} replace />;
-
-  async function onDevLogin() {
-    setError(null);
-    setSubmitting(true);
-    try {
-      await devLogin(DEV_EMAIL);
-      nav(from, { replace: true });
-    } catch (err) {
-      setError(errorMessage(err));
-    } finally {
-      setSubmitting(false);
-    }
-  }
 
   async function onRequest(e: FormEvent) {
     e.preventDefault();
@@ -210,25 +190,6 @@ export default function Login() {
           </div>
         )}
 
-        {SHOW_DEV_LOGIN && (
-          <>
-            <hr className="meta-rule" />
-            <p className="meta-key">Local development only</p>
-            <button
-              type="button"
-              className="btn btn-secondary btn-block"
-              onClick={onDevLogin}
-              disabled={submitting}
-            >
-              Skip the code, sign in as {DEV_EMAIL}
-            </button>
-            <p className="hint">
-              Calls <code className="num">/auth/admin/dev-login</code>, which 404s unless the
-              backend has <code className="num">app.admin.dev-auto-login</code> on. This button
-              is not built into production bundles.
-            </p>
-          </>
-        )}
       </form>
 
       <p className="hint" style={{ marginTop: 16 }}>

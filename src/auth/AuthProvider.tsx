@@ -9,7 +9,6 @@ type AuthContextValue = {
   loading: boolean;
   requestCode: (email: string) => Promise<CodeSent>;
   verifyCode: (email: string, code: string) => Promise<void>;
-  devLogin: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -61,10 +60,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     requestCode: (email) => api.post<CodeSent>('/auth/admin/request-code', { email }),
     verifyCode: async (email, code) => {
       const grant = await api.post<SessionGrant>('/auth/admin/verify-code', { email, code });
-      await completeGrant(grant);
-    },
-    devLogin: async (email) => {
-      const grant = await api.post<SessionGrant>('/auth/admin/dev-login', { email });
       await completeGrant(grant);
     },
     signOut: async () => {

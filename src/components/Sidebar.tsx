@@ -26,6 +26,7 @@ const NAV = [
   { to: '/sponsors', label: 'Sponsors', icon: IconBuilding, badge: false },
   { to: '/invoices', label: 'Invoices', icon: IconReceipt, badge: false },
   { to: '/members', label: 'Members', icon: IconPeople, badge: false },
+  { to: '/members/email', label: 'Email members', icon: IconMail, badge: false },
   { to: '/unmatched', label: 'Unmatched', icon: IconAlert, badge: true },
 ];
 
@@ -184,6 +185,15 @@ function IconPeople() {
       <path d="M3 20c1-3 3.5-4.5 6-4.5s5 1.5 6 4.5" />
       <circle cx="17" cy="9" r="2.5" />
       <path d="M15.5 15c2.5 0 4.5 1.5 5.5 4" />
+    </svg>
+  );
+}
+
+function IconMail() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="M3 7l9 6 9-6" />
     </svg>
   );
 }
