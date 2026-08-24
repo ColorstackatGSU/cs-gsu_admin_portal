@@ -8,6 +8,8 @@ import Invoices from './pages/Invoices';
 import InvoiceNew from './pages/InvoiceNew';
 import InvoiceDetail from './pages/InvoiceDetail';
 import UnmatchedPayments from './pages/UnmatchedPayments';
+import Members from './pages/Members';
+import MemberDetail from './pages/MemberDetail';
 import NotFound from './pages/NotFound';
 
 /**
@@ -33,6 +35,8 @@ export default function App() {
         <Route path="invoices/new" element={<ProtectedRoute><InvoiceNew /></ProtectedRoute>} />
         <Route path="invoices/:id" element={<ProtectedRoute><InvoiceDetail /></ProtectedRoute>} />
         <Route path="unmatched" element={<ProtectedRoute><UnmatchedPayments /></ProtectedRoute>} />
+        <Route path="members" element={<ProtectedRoute><Members /></ProtectedRoute>} />
+        <Route path="members/:id" element={<ProtectedRoute><MemberDetail /></ProtectedRoute>} />
 
         <Route path="*" element={<NotFound />} />
       </Route>

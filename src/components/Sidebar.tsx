@@ -25,6 +25,7 @@ import { ORG } from '../data/org';
 const NAV = [
   { to: '/sponsors', label: 'Sponsors', icon: IconBuilding, badge: false },
   { to: '/invoices', label: 'Invoices', icon: IconReceipt, badge: false },
+  { to: '/members', label: 'Members', icon: IconPeople, badge: false },
   { to: '/unmatched', label: 'Unmatched', icon: IconAlert, badge: true },
 ];
 
@@ -172,6 +173,17 @@ function IconAlert() {
       <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" />
       <path d="M12 9v4.5" />
       <path d="M12 17.2h.01" />
+    </svg>
+  );
+}
+
+function IconPeople() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="9" cy="8" r="3.25" />
+      <path d="M3 20c1-3 3.5-4.5 6-4.5s5 1.5 6 4.5" />
+      <circle cx="17" cy="9" r="2.5" />
+      <path d="M15.5 15c2.5 0 4.5 1.5 5.5 4" />
     </svg>
   );
 }

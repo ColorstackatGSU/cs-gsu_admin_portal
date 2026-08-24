@@ -16,6 +16,7 @@ import {
   type Tier,
 } from '../lib/admin';
 import { ROLE_HELP, displayStatus, formatDate, formatMoney } from '../lib/format';
+import type { Impersonation } from '../lib/admin';
 import StatusPill, { ContactPill, SponsorPill } from '../components/StatusPill';
 import { Empty, ErrorNote, Field, OkNote, Select } from '../components/Form';
 
@@ -174,6 +175,7 @@ export default function SponsorDetail() {
               Website ↗
             </a>
           )}
+          <ViewAsSponsorButton sponsorId={s.id} onError={setError} />
           <Link className="btn btn-primary" to={`/invoices/new?sponsor=${s.id}`}>
             New invoice
           </Link>
@@ -192,6 +194,52 @@ export default function SponsorDetail() {
         sponsorName={s.name}
       />
     </div>
+  );
+}
+
+/* ============================================================================
+   VIEW AS SPONSOR
+   ==========================================================================*/
+
+/**
+ * Mints a fresh magic-link token for the sponsor's primary contact and opens
+ * the sponsor portal /impersonate route in a new tab. The token is single-use
+ * and short-lived, so each click gets a fresh one.
+ *
+ * Officer safety: opens in a new tab so the officer's own admin session in
+ * this tab is untouched. When they are done browsing as the sponsor, closing
+ * the new tab is enough — the admin tab still holds their own auth.
+ */
+function ViewAsSponsorButton({
+  sponsorId,
+  onError,
+}: {
+  sponsorId: string;
+  onError: (message: string | null) => void;
+}) {
+  const [busy, setBusy] = useState(false);
+
+  async function open() {
+    if (busy) return;
+    onError(null);
+    setBusy(true);
+    try {
+      const grant = await api.post<Impersonation>(`/admin/sponsors/${sponsorId}/impersonate`);
+      const url = new URL('/impersonate', import.meta.env.VITE_SPONSOR_PORTAL_URL || 'https://sponsors.colorstackatgsu.com');
+      url.searchParams.set('token', grant.tokenHash);
+      if (grant.sponsorName) url.searchParams.set('sponsor', grant.sponsorName);
+      window.open(url.toString(), '_blank', 'noopener,noreferrer');
+    } catch (e) {
+      onError(errorMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <button type="button" className="btn btn-secondary" onClick={open} disabled={busy}>
+      {busy ? 'Opening…' : 'View as sponsor ↗'}
+    </button>
   );
 }
 

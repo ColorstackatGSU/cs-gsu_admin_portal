@@ -63,6 +63,39 @@ export type Invoice = {
   paidAt: string | null;
 };
 
+/** What POST /admin/sponsors/{id}/impersonate returns. The admin frontend
+ *  opens sponsors.colorstackatgsu.com/impersonate?token=<tokenHash>&sponsor=<name>
+ *  in a new tab; the sponsor portal calls verifyOtp with the token_hash and
+ *  lands the officer in a real session as that sponsor's primary contact. */
+export type Impersonation = {
+  email: string;
+  tokenHash: string;
+  sponsorName: string;
+};
+
+/** A member as an officer sees them. Every column: this is the admin view. */
+export type Member = {
+  id: string;
+  userId: string | null;
+  email: string;
+  personalEmail: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  pronouns: string | null;
+  majors: string | null;
+  classYear: string | null;
+  gradTerm: string | null;
+  gradYear: number | null;
+  linkedinUrl: string | null;
+  githubUrl: string | null;
+  discordUsername: string | null;
+  resumeShared: boolean;
+  hasResume: boolean;
+  resumeUploadedAt: string | null;
+  activatedAt: string | null;
+  createdAt: string;
+};
+
 export type Unmatched = {
   id: string;
   zeffyPaymentId: string;
