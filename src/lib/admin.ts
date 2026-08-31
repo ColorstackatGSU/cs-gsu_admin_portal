@@ -81,7 +81,12 @@ export type Member = {
   gradYear: number | null;
   linkedinUrl: string | null;
   githubUrl: string | null;
+  /** What the member typed on their profile. A claim, not proof. */
   discordUsername: string | null;
+  /** The Discord account they actually proved they hold, and when. Null until
+   *  they click Verify in the server. */
+  discordUserId: string | null;
+  discordVerifiedAt: string | null;
   resumeShared: boolean;
   hasResume: boolean;
   resumeUploadedAt: string | null;

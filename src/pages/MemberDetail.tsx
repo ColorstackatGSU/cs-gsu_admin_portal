@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import { errorMessage, type Member } from '../lib/admin';
+import VerifiedBadge from '../components/VerifiedBadge';
 
 /**
  * Read-only officer view of one member. All fields visible, plus a "View
@@ -66,7 +67,17 @@ export default function MemberDetail() {
         <Field label="Pronouns" value={member.pronouns} />
         <Field label="LinkedIn" value={member.linkedinUrl} link />
         <Field label="GitHub" value={member.githubUrl} link />
-        <Field label="Discord" value={member.discordUsername} />
+        <Field
+          label="Discord"
+          value={member.discordUsername}
+          badge={<VerifiedBadge verifiedAt={member.discordVerifiedAt} />}
+        />
+        {member.discordUsername && !member.discordVerifiedAt && (
+          <p className="hint" style={{ marginLeft: 156 }}>
+            They typed this handle but have never clicked Verify in the server, so nothing
+            confirms the account is theirs.
+          </p>
+        )}
       </section>
 
       <section className="card" style={{ marginBottom: 16 }}>
@@ -113,16 +124,27 @@ function Field({
   value,
   link,
   mono,
+  badge,
 }: {
   label: string;
   value: string | null;
   link?: boolean;
   mono?: boolean;
+  /** Rendered after the value. Used for the Discord verified badge. */
+  badge?: React.ReactNode;
 }) {
   return (
     <div style={{ display: 'flex', gap: 16, padding: '6px 0', fontSize: 14 }}>
       <span className="muted" style={{ minWidth: 140 }}>{label}</span>
-      <span style={{ fontFamily: mono ? 'ui-monospace, monospace' : undefined }}>
+      <span
+        style={{
+          fontFamily: mono ? 'ui-monospace, monospace' : undefined,
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 8,
+          flexWrap: 'wrap',
+        }}
+      >
         {value ? (
           link ? (
             <a href={value} target="_blank" rel="noopener noreferrer" className="link">{value}</a>
@@ -132,6 +154,7 @@ function Field({
         ) : (
           <span className="muted">—</span>
         )}
+        {badge}
       </span>
     </div>
   );

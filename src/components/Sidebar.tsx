@@ -2,6 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../auth/AuthProvider';
 import { useUnmatchedCount } from '../hooks/useUnmatchedCount';
+import { useBotQueueCount } from '../hooks/useBotQueueCount';
 import { ORG } from '../data/org';
 
 /**
@@ -15,26 +16,30 @@ import { ORG } from '../data/org';
  * behind a top bar with a hamburger. The scrim closes it on click, and Escape
  * closes it too, since a stuck drawer with no visible dismiss is disorienting.
  *
- * Unmatched payments carry a count badge. It is the only screen in the portal
- * with a genuine queue behind it — money that arrived and has not been tied to
- * an invoice — and nobody goes looking for it unless something says to.
+ * Two items carry a count badge, and they are the two genuine queues in the
+ * portal: money that arrived and has not been tied to an invoice, and people who
+ * clicked Verify in Discord and could not be matched. Nobody goes looking at
+ * either page unless something says to, so the number rides in the nav on every
+ * screen rather than only on the page that would clear it.
  *
- * Icons are inline SVG rather than a dependency. It is five icons, drawn at
- * stroke 2.25 so they hold up next to the uppercase labels.
+ * Icons are inline SVG rather than a dependency. Drawn at stroke 2.25 so they
+ * hold up next to the uppercase labels.
  */
 const NAV = [
-  { to: '/sponsors', label: 'Sponsors', icon: IconBuilding, badge: false },
-  { to: '/invoices', label: 'Invoices', icon: IconReceipt, badge: false },
-  { to: '/members', label: 'Members', icon: IconPeople, badge: false },
-  { to: '/members/email', label: 'Email members', icon: IconMail, badge: false },
-  { to: '/unmatched', label: 'Unmatched', icon: IconAlert, badge: true },
-];
+  { to: '/sponsors', label: 'Sponsors', icon: IconBuilding, badge: 'none' },
+  { to: '/invoices', label: 'Invoices', icon: IconReceipt, badge: 'none' },
+  { to: '/members', label: 'Members', icon: IconPeople, badge: 'none' },
+  { to: '/members/email', label: 'Email members', icon: IconMail, badge: 'none' },
+  { to: '/unmatched', label: 'Unmatched', icon: IconAlert, badge: 'unmatched' },
+  { to: '/bot', label: 'Discord', icon: IconDiscord, badge: 'bot' },
+] as const;
 
 export default function Sidebar() {
   const [open, setOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const { signOut } = useAuth();
   const unmatched = useUnmatchedCount();
+  const botQueue = useBotQueueCount();
   const nav = useNavigate();
 
   async function handleSignOut() {
@@ -99,22 +104,29 @@ export default function Sidebar() {
         </div>
 
         <nav className="side-nav" aria-label="Primary">
-          {NAV.map(({ to, label, icon: Icon, badge }) => (
-            <NavLink
-              key={to}
-              to={to}
-              className={({ isActive }) => (isActive ? 'side-link active' : 'side-link')}
-              onClick={() => setOpen(false)}
-            >
-              <Icon />
-              {label}
-              {badge && unmatched != null && unmatched > 0 && (
-                <span className="side-count" aria-label={`${unmatched} waiting`}>
-                  {unmatched}
-                </span>
-              )}
-            </NavLink>
-          ))}
+          {NAV.map(({ to, label, icon: Icon, badge }) => {
+            const count =
+              badge === 'unmatched' ? unmatched : badge === 'bot' ? botQueue : null;
+            return (
+              <NavLink
+                key={to}
+                to={to}
+                // /bot is a prefix for four screens, so it stays lit on all of
+                // them; every other item is its own exact page.
+                end={to === '/bot' ? false : undefined}
+                className={({ isActive }) => (isActive ? 'side-link active' : 'side-link')}
+                onClick={() => setOpen(false)}
+              >
+                <Icon />
+                {label}
+                {count != null && count > 0 && (
+                  <span className="side-count" aria-label={`${count} waiting`}>
+                    {count}
+                  </span>
+                )}
+              </NavLink>
+            );
+          })}
         </nav>
 
         <div className="side-foot">
@@ -194,6 +206,16 @@ function IconMail() {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <rect x="3" y="5" width="18" height="14" rx="2" />
       <path d="M3 7l9 6 9-6" />
+    </svg>
+  );
+}
+
+/* Discord's own mark, simplified to a single filled path at the same optical
+   weight as the stroked icons beside it. */
+function IconDiscord() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M19.3 5.4A16.8 16.8 0 0 0 15.1 4l-.3.6a12.5 12.5 0 0 1 3.7 1.9 15.9 15.9 0 0 0-12.9 0 12.6 12.6 0 0 1 3.7-1.9L9 4a16.8 16.8 0 0 0-4.2 1.4C2.1 9.4 1.4 13.2 1.7 17a16.9 16.9 0 0 0 5.1 2.6l1.1-1.7c-.9-.3-1.8-.8-2.6-1.3l.5-.4a12.1 12.1 0 0 0 10.4 0l.5.4c-.8.5-1.7 1-2.6 1.3l1.1 1.7A16.9 16.9 0 0 0 22.3 17c.4-4.4-.7-8.2-3-11.6zM8.6 14.8c-1 0-1.8-.9-1.8-2.1 0-1.1.8-2.1 1.8-2.1s1.9.9 1.8 2.1c0 1.2-.8 2.1-1.8 2.1zm6.8 0c-1 0-1.8-.9-1.8-2.1 0-1.1.8-2.1 1.8-2.1s1.9.9 1.8 2.1c0 1.2-.8 2.1-1.8 2.1z" />
     </svg>
   );
 }

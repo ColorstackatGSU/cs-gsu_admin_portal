@@ -1163,3 +1163,54 @@ select.input:focus {
   box-shadow: 3px 3px 0 var(--ink, #14110D);
   margin-bottom: 12px;
 }
+
+/* ============================================================================
+   DISCORD VERIFICATIONS · last 30 days
+   ============================================================================
+   Thirty integers and one question: is this shape roughly what I expected. A
+   charting dependency would be more code than the chart. Bars sit on the ink
+   baseline so a zero day is still a visible tick rather than a gap, because a
+   gap reads as a spike on either side of it.
+   ==========================================================================*/
+
+.sparkbars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 96px;
+  padding-bottom: 2px;
+  border-bottom: var(--bw-thin) solid var(--ink);
+}
+.sparkbar {
+  flex: 1;
+  min-height: 2px;
+  background: var(--violet);
+  border: var(--bw-thin) solid var(--ink);
+  border-bottom: none;
+}
+.sparkbars-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+
+/* The Discord verified badge, wherever a Discord handle is shown. Never colour
+   alone: it always carries the word. */
+.verified-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border: var(--bw-thin) solid var(--ink);
+  border-radius: 999px;
+  background: var(--mint);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.verified-badge svg { width: 12px; height: 12px; flex-shrink: 0; }

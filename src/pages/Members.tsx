@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { errorMessage, type Member } from '../lib/admin';
+import VerifiedBadge from '../components/VerifiedBadge';
 
 /**
  * Every member the intake form has produced, newest first. Admin-only, so no
@@ -27,7 +28,7 @@ export default function Members() {
     const q = query.trim().toLowerCase();
     const hay = [
       m.email, m.personalEmail, m.firstName, m.lastName,
-      m.majors, m.classYear, m.gradTerm, m.gradYear?.toString(),
+      m.majors, m.classYear, m.gradTerm, m.gradYear?.toString(), m.discordUsername,
     ].filter(Boolean).join(' ').toLowerCase();
     return hay.includes(q);
   });
@@ -58,6 +59,7 @@ export default function Members() {
                   <th>Name</th>
                   <th>Email</th>
                   <th>Grad</th>
+                  <th>Discord</th>
                   <th>Resume</th>
                   <th>Activated</th>
                 </tr>
@@ -73,6 +75,15 @@ export default function Members() {
                     <td className="muted">{m.email}</td>
                     <td className="muted">
                       {[m.gradTerm, m.gradYear].filter(Boolean).join(' ') || '—'}
+                    </td>
+                    <td>
+                      {m.discordVerifiedAt ? (
+                        <VerifiedBadge verifiedAt={m.discordVerifiedAt} />
+                      ) : m.discordUsername ? (
+                        <span className="muted">{m.discordUsername}</span>
+                      ) : (
+                        '—'
+                      )}
                     </td>
                     <td>{m.hasResume ? (m.resumeShared ? '✓ shared' : '✓ private') : '—'}</td>
                     <td>{m.activatedAt ? '✓' : '—'}</td>

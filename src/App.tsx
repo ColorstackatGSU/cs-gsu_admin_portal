@@ -11,6 +11,10 @@ import UnmatchedPayments from './pages/UnmatchedPayments';
 import Members from './pages/Members';
 import MemberDetail from './pages/MemberDetail';
 import MemberEmail from './pages/MemberEmail';
+import BotOverview from './pages/BotOverview';
+import BotQueue from './pages/BotQueue';
+import BotLinks from './pages/BotLinks';
+import BotHealth from './pages/BotHealth';
 import SponsorView from './pages/SponsorView';
 import NotFound from './pages/NotFound';
 
@@ -41,6 +45,14 @@ export default function App() {
         <Route path="members" element={<ProtectedRoute><Members /></ProtectedRoute>} />
         <Route path="members/:id" element={<ProtectedRoute><MemberDetail /></ProtectedRoute>} />
         <Route path="members/email" element={<ProtectedRoute><MemberEmail /></ProtectedRoute>} />
+
+        {/* Discord. The bot used to be its own deployment with its own state; these four
+            screens are the officer-facing half of absorbing it, and /bot/queue is the one
+            that did not exist anywhere before. */}
+        <Route path="bot" element={<ProtectedRoute><BotOverview /></ProtectedRoute>} />
+        <Route path="bot/queue" element={<ProtectedRoute><BotQueue /></ProtectedRoute>} />
+        <Route path="bot/links" element={<ProtectedRoute><BotLinks /></ProtectedRoute>} />
+        <Route path="bot/health" element={<ProtectedRoute><BotHealth /></ProtectedRoute>} />
 
         <Route path="*" element={<NotFound />} />
       </Route>
