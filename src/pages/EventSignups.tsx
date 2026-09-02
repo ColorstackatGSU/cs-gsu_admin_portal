@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
-import { errorMessage, type EventSignup, type EventSignupSummary } from '../lib/admin';
+import {
+  errorMessage,
+  type EventSignup,
+  type EventSignupResent,
+  type EventSignupSummary,
+} from '../lib/admin';
 
 /**
  * Who scanned the QR code at a table, and how many of them actually joined.
@@ -11,8 +16,11 @@ import { errorMessage, type EventSignup, type EventSignupSummary } from '../lib/
  * the one that decides whether tabling was worth a Saturday, and nothing in the portal
  * could answer it before, because scans and members were the same table or no table.
  *
- * Read-only. Rows are written by the public /fair endpoint and there is nothing here an
- * officer should be editing — a signup is a record of something that happened.
+ * Almost read-only. Rows are written by the public /fair endpoint and a signup is a record
+ * of something that happened, so there is nothing here to edit. The one action is resending
+ * somebody's email, which exists because the signup only mails the personal address and the
+ * two things that actually go wrong at a table are a typo in it and an inbox that ate the
+ * mail.
  */
 
 type Filter = 'all' | 'joined' | 'not-joined' | 'not-emailed';
@@ -53,6 +61,11 @@ export default function EventSignups() {
   const [filter, setFilter] = useState<Filter>('all');
   const [query, setQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
+  /** The row a resend is in flight for, so only that row's buttons go quiet. */
+  const [resending, setResending] = useState<string | null>(null);
+  /** Per-row outcome, shown in place rather than as a banner: an officer doing five of
+   *  these in a row needs to see which one worked, not that something did. */
+  const [resent, setResent] = useState<Record<string, string>>({});
 
   // The summary is loaded once: it is what populates the event picker, so refetching it
   // per event would make the picker depend on the thing it selects.
@@ -99,6 +112,37 @@ export default function EventSignups() {
       return hay.includes(q);
     });
   }, [signups, filter, query]);
+
+  /**
+   * Resends one person's check-in email to whichever address the officer picks.
+   *
+   * Both buttons stay available even for somebody already emailed. The one-per-person rule
+   * exists to stop a public QR code mailing a stranger repeatedly; an officer answering
+   * "I never got it" is the case it was never meant to catch.
+   */
+  async function resend(signup: EventSignup, to: 'personal' | 'student') {
+    setResending(signup.id);
+    setResent((prev) => ({ ...prev, [signup.id]: '' }));
+    try {
+      const result = await api.post<EventSignupResent>(
+        `/admin/event-signups/${signup.id}/resend`,
+        { to },
+      );
+      setResent((prev) => ({ ...prev, [signup.id]: `Sent to ${result.sentTo}` }));
+      // Reflect the new emailed_at without refetching the whole table, which would lose
+      // the officer's scroll position halfway down a list of two hundred.
+      setLoaded((prev) => prev && ({
+        ...prev,
+        rows: prev.rows.map((r) => r.id === signup.id
+          ? { ...r, emailedAt: result.emailedAt, emailCount: result.emailCount }
+          : r),
+      }));
+    } catch (e: unknown) {
+      setResent((prev) => ({ ...prev, [signup.id]: errorMessage(e) }));
+    } finally {
+      setResending(null);
+    }
+  }
 
   /**
    * The list as a spreadsheet, because the follow-up email after a fair is written in
@@ -217,6 +261,7 @@ export default function EventSignups() {
                 <th>Signed up</th>
                 <th>Emailed</th>
                 <th>Status</th>
+                <th>Resend</th>
               </tr>
             </thead>
             <tbody>
@@ -246,6 +291,35 @@ export default function EventSignups() {
                       : s.memberStatus === 'unclaimed'
                         ? 'form filled'
                         : '—'}
+                  </td>
+                  <td>
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-secondary"
+                        disabled={resending === s.id || !s.email}
+                        // The signup itself only ever mails the personal address, so this
+                        // is the "try again" button rather than the alternative one.
+                        title={s.email ?? 'No personal address on this signup'}
+                        onClick={() => void resend(s, 'personal')}
+                      >
+                        Personal
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-secondary"
+                        disabled={resending === s.id}
+                        title={s.studentEmail}
+                        onClick={() => void resend(s, 'student')}
+                      >
+                        School
+                      </button>
+                    </div>
+                    {resent[s.id] && (
+                      <p className="muted" style={{ fontSize: 12, margin: '6px 0 0' }}>
+                        {resent[s.id]}
+                      </p>
+                    )}
                   </td>
                 </tr>
               ))}

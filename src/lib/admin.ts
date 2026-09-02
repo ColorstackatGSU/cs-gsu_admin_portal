@@ -109,12 +109,25 @@ export type EventSignup = {
   lastName: string | null;
   email: string | null;
   studentEmail: string;
-  /** Null when the email never went out — a bounce, or a rescan inside the cooldown. */
+  /**
+   * Null when the email never went out, which now means only one thing: the send failed.
+   * A rescan does not produce a second email, so this is set exactly once by the signup
+   * itself, and again by an officer resending from this screen.
+   */
   emailedAt: string | null;
   emailCount: number;
   memberId: string | null;
   memberStatus: 'none' | 'unclaimed' | 'activated';
   createdAt: string;
+};
+
+/** Mirrors FairResendService.Resent. */
+export type EventSignupResent = {
+  /** The address it actually went to, so the officer can read it back. */
+  sentTo: string;
+  audience: 'new' | 'unclaimed' | 'member' | 'member_no_resume';
+  emailedAt: string;
+  emailCount: number;
 };
 
 /** Mirrors AdminPortalService.EventSignupSummary. One row per event. */
