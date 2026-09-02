@@ -30,6 +30,7 @@ const NAV = [
   { to: '/invoices', label: 'Invoices', icon: IconReceipt, badge: 'none' },
   { to: '/members', label: 'Members', icon: IconPeople, badge: 'none' },
   { to: '/members/email', label: 'Email members', icon: IconMail, badge: 'none' },
+  { to: '/fair', label: 'Involvement fair', icon: IconQr, badge: 'none' },
   { to: '/unmatched', label: 'Unmatched', icon: IconAlert, badge: 'unmatched' },
   { to: '/bot', label: 'Discord', icon: IconDiscord, badge: 'bot' },
 ] as const;
@@ -206,6 +207,20 @@ function IconMail() {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <rect x="3" y="5" width="18" height="14" rx="2" />
       <path d="M3 7l9 6 9-6" />
+    </svg>
+  );
+}
+
+/* A QR code, abbreviated to the three finder squares and a couple of modules.
+   Drawing a real one at 20px is mud; the three corners are what makes the shape
+   readable as a QR code at any size, so they are all that is here. */
+function IconQr() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="3" width="7" height="7" />
+      <rect x="14" y="3" width="7" height="7" />
+      <rect x="3" y="14" width="7" height="7" />
+      <path d="M14 14h3M20 14h1M14 17v4M17 20h4M20 17v0" />
     </svg>
   );
 }

@@ -1214,3 +1214,57 @@ select.input:focus {
   white-space: nowrap;
 }
 .verified-badge svg { width: 12px; height: 12px; flex-shrink: 0; }
+
+/* ============================================================================
+   STAT ROW
+   ==========================================================================*/
+/* The headline numbers on the involvement fair screen. Four framed blocks in a
+   row that wraps to two on a phone, matching the card treatment used elsewhere
+   rather than inventing a second one.
+
+   auto-fit with a 150px floor rather than a fixed four columns: an officer
+   checking numbers during a fair is doing it on a phone in one hand, and four
+   columns at that width turns every value into a two-line wrap. */
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.stat {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stat-label {
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.stat-value {
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+/* The conversion percentage, which rides alongside the count rather than
+   replacing it. Both matter and they answer different questions: 62 is how many
+   people to follow up with, 44% is whether the table was worth the Saturday. */
+.stat-note {
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+}

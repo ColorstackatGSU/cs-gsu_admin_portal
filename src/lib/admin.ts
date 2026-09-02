@@ -94,6 +94,41 @@ export type Member = {
   createdAt: string;
 };
 
+/**
+ * One person who scanned the QR code at a table. Mirrors
+ * AdminPortalService.EventSignup.
+ *
+ * Not a member, and that distinction is the whole point of the table: membership still
+ * only comes from the intake form. memberStatus is what became of them, joined at read
+ * time on either address, so it is current every time this screen loads.
+ */
+export type EventSignup = {
+  id: string;
+  eventSlug: string;
+  firstName: string | null;
+  lastName: string | null;
+  email: string | null;
+  studentEmail: string;
+  /** Null when the email never went out — a bounce, or a rescan inside the cooldown. */
+  emailedAt: string | null;
+  emailCount: number;
+  memberId: string | null;
+  memberStatus: 'none' | 'unclaimed' | 'activated';
+  createdAt: string;
+};
+
+/** Mirrors AdminPortalService.EventSignupSummary. One row per event. */
+export type EventSignupSummary = {
+  eventSlug: string;
+  scans: number;
+  emailed: number;
+  /** Scans that went on to a members row, whether or not they set a password. */
+  joined: number;
+  activated: number;
+  firstAt: string | null;
+  lastAt: string | null;
+};
+
 export type Unmatched = {
   id: string;
   zeffyPaymentId: string;
