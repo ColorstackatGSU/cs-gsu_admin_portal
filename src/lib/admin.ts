@@ -130,6 +130,57 @@ export type EventSignupResent = {
   emailCount: number;
 };
 
+/* ---- Follow-up campaign ---------------------------------------------------- */
+
+/** The four groups, ranked most-blocking first. Mirrors FollowUpEmail's constants. */
+export type FollowUpSegment =
+  | 'fair_no_form'
+  | 'no_account'
+  | 'no_resume'
+  | 'thanks_only';
+
+export const SEGMENT_LABELS: Record<string, string> = {
+  fair_no_form: 'Scanned, never joined',
+  no_account: 'Joined, no account',
+  no_resume: 'Account, no resume',
+  thanks_only: 'All done',
+};
+
+/** What the email actually asks of them, so an officer can see it without sending one. */
+export const SEGMENT_HELP: Record<string, string> = {
+  fair_no_form: 'Fill in the membership form. The link comes prefilled with what they gave us at the table.',
+  no_account: 'Set a password so they can sign in. They are on the roster already.',
+  no_resume: 'Upload a resume, because that is what sponsors see.',
+  thanks_only: 'Nothing. They came to the fair and have everything done, so it is a thank you and no ask.',
+};
+
+export type FollowUpSegmentPreview = {
+  segment: FollowUpSegment;
+  people: number;
+  alreadySent: number;
+  toSend: number;
+};
+
+/** Mirrors FollowUpService.Preview. */
+export type FollowUpPreview = {
+  campaign: string;
+  segments: FollowUpSegmentPreview[];
+  people: number;
+  alreadySent: number;
+  toSend: number;
+  /** Addresses, not people. Roughly double, since most have a school and a personal one. */
+  recipients: number;
+  maxPerRun: number;
+};
+
+/** Mirrors FollowUpService.SendResult. */
+export type FollowUpSendResult = {
+  sent: number;
+  skipped: number;
+  failed: string[];
+  remaining: number;
+};
+
 /** Mirrors AdminPortalService.EventSignupSummary. One row per event. */
 export type EventSignupSummary = {
   eventSlug: string;

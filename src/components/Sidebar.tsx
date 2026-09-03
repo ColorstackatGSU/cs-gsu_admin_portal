@@ -31,6 +31,7 @@ const NAV = [
   { to: '/members', label: 'Members', icon: IconPeople, badge: 'none' },
   { to: '/members/email', label: 'Email members', icon: IconMail, badge: 'none' },
   { to: '/fair', label: 'Involvement fair', icon: IconQr, badge: 'none' },
+  { to: '/follow-up', label: 'Follow-up', icon: IconSend, badge: 'none' },
   { to: '/unmatched', label: 'Unmatched', icon: IconAlert, badge: 'unmatched' },
   { to: '/bot', label: 'Discord', icon: IconDiscord, badge: 'bot' },
 ] as const;
@@ -207,6 +208,17 @@ function IconMail() {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <rect x="3" y="5" width="18" height="14" rx="2" />
       <path d="M3 7l9 6 9-6" />
+    </svg>
+  );
+}
+
+/* A paper plane, for the one screen that sends a batch of mail. Drawn as an
+   outline rather than a solid so it sits at the same weight as its neighbours. */
+function IconSend() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M21 3 10.5 13.5" />
+      <path d="M21 3l-6.5 18-4-8.5L2 8.5 21 3z" />
     </svg>
   );
 }
