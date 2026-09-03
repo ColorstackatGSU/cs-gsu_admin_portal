@@ -94,8 +94,8 @@ export default function MemberDetail() {
         <h2 className="section-title" style={{ marginTop: 0 }}>Resume</h2>
         <p className="muted" style={{ fontSize: 14 }}>
           {member.hasResume
-            ? `On file. ${member.resumeShared ? 'Shared with eligible sponsors.' : 'Private to this member.'}`
-            : 'No resume uploaded yet.'}
+            ? 'On file, and in the book eligible sponsors can see. Every member’s is.'
+            : 'No resume uploaded yet, so there is nothing in the book for them.'}
         </p>
         {member.hasResume && (
           <button

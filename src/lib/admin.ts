@@ -87,7 +87,6 @@ export type Member = {
    *  they click Verify in the server. */
   discordUserId: string | null;
   discordVerifiedAt: string | null;
-  resumeShared: boolean;
   hasResume: boolean;
   resumeUploadedAt: string | null;
   activatedAt: string | null;

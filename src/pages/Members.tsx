@@ -85,7 +85,7 @@ export default function Members() {
                         '—'
                       )}
                     </td>
-                    <td>{m.hasResume ? (m.resumeShared ? '✓ shared' : '✓ private') : '—'}</td>
+                    <td>{m.hasResume ? '✓' : '—'}</td>
                     <td>{m.activatedAt ? '✓' : '—'}</td>
                   </tr>
                 ))}

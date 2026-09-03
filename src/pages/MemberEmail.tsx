@@ -20,13 +20,12 @@ type Filter = {
   gradYear: string;
   classYear: string;
   hasResume: string;
-  resumeShared: string;
   activated: string;
 };
 
 const EMPTY_FILTER: Filter = {
   gradTerm: '', gradYear: '', classYear: '',
-  hasResume: '', resumeShared: '', activated: '',
+  hasResume: '', activated: '',
 };
 
 type SendResult = { sent: number; failed: string[] };
@@ -70,8 +69,6 @@ export default function MemberEmail() {
       if (filter.gradYear && String(m.gradYear ?? '') !== filter.gradYear) return false;
       if (filter.hasResume === 'true' && !m.hasResume) return false;
       if (filter.hasResume === 'false' && m.hasResume) return false;
-      if (filter.resumeShared === 'true' && !m.resumeShared) return false;
-      if (filter.resumeShared === 'false' && m.resumeShared) return false;
       if (filter.activated === 'true' && !m.activatedAt) return false;
       if (filter.activated === 'false' && m.activatedAt) return false;
       if (q) {
@@ -205,12 +202,6 @@ export default function MemberEmail() {
                 <option value="">Any</option>
                 <option value="true">On file</option>
                 <option value="false">Missing</option>
-              </FilterSelect>
-              <FilterSelect label="Resume sharing" value={filter.resumeShared}
-                            onChange={(v) => setFilter({ ...filter, resumeShared: v })}>
-                <option value="">Any</option>
-                <option value="true">Opted in</option>
-                <option value="false">Opted out</option>
               </FilterSelect>
               <FilterSelect label="Sign-in status" value={filter.activated}
                             onChange={(v) => setFilter({ ...filter, activated: v })}>
