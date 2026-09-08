@@ -851,6 +851,19 @@ select.input:focus {
    that is moving. */
 .table-scroll { overflow-x: auto; }
 
+/* Page controls, under the table they page through. Centred rather than pushed
+   to one edge so the position readout sits between the two buttons that change
+   it, and wrapping on a phone leaves the readout on its own line instead of
+   squeezing a button off the side. */
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 14px;
+}
+
 /* ============================================================================
    ROW LIST
    ==========================================================================*/
