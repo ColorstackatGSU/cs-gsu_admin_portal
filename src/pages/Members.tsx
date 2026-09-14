@@ -260,7 +260,7 @@ export default function Members() {
   );
 }
 
-/** Same shape as the fair's numbers, so the two roster screens read alike. */
+/** Same shape as the resume push numbers, so the screens read alike. */
 function Stat({ label, value }: { label: string; value: number }) {
   return (
     <div className="card stat">

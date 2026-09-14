@@ -1231,13 +1231,12 @@ select.input:focus {
 /* ============================================================================
    STAT ROW
    ==========================================================================*/
-/* The headline numbers on the involvement fair screen. Four framed blocks in a
-   row that wraps to two on a phone, matching the card treatment used elsewhere
-   rather than inventing a second one.
+/* Headline numbers. Four framed blocks in a row that wraps to two on a phone,
+   matching the card treatment used elsewhere rather than inventing a second one.
 
    auto-fit with a 150px floor rather than a fixed four columns: an officer
-   checking numbers during a fair is doing it on a phone in one hand, and four
-   columns at that width turns every value into a two-line wrap. */
+   checking numbers on a phone in one hand gets a two-line wrap on every value
+   at four columns. */
 .stat-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));

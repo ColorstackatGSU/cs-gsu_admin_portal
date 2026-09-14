@@ -93,103 +93,76 @@ export type Member = {
   createdAt: string;
 };
 
-/**
- * One person who scanned the QR code at a table. Mirrors
- * AdminPortalService.EventSignup.
- *
- * Not a member, and that distinction is the whole point of the table: membership still
- * only comes from the intake form. memberStatus is what became of them, joined at read
- * time on either address, so it is current every time this screen loads.
- */
-export type EventSignup = {
-  id: string;
-  eventSlug: string;
-  firstName: string | null;
-  lastName: string | null;
-  email: string | null;
-  studentEmail: string;
-  /**
-   * Null when the email never went out, which now means only one thing: the send failed.
-   * A rescan does not produce a second email, so this is set exactly once by the signup
-   * itself, and again by an officer resending from this screen.
-   */
-  emailedAt: string | null;
-  emailCount: number;
-  memberId: string | null;
-  memberStatus: 'none' | 'unclaimed' | 'activated';
-  createdAt: string;
+/* ---- Resume push ---------------------------------------------------------- */
+
+/** The two versions of the email. Mirrors ResumePushEmail's constants. */
+export type ResumePushSegment = 'activated' | 'not_activated';
+
+export const PUSH_SEGMENT_LABELS: Record<string, string> = {
+  activated: 'Activated, no resume',
+  not_activated: 'Never activated',
+  all: 'Everyone',
 };
 
-/** Mirrors FairResendService.Resent. */
-export type EventSignupResent = {
-  /** The address it actually went to, so the officer can read it back. */
-  sentTo: string;
-  audience: 'new' | 'unclaimed' | 'member' | 'member_no_resume';
-  emailedAt: string;
-  emailCount: number;
+/** Where the button in each version takes them, so an officer can see it without sending one. */
+export const PUSH_SEGMENT_HELP: Record<string, string> = {
+  activated: 'Straight to the upload page.',
+  not_activated: 'Activation first (Continue with Google, or a code), then upload.',
 };
 
-/* ---- Follow-up campaign ---------------------------------------------------- */
-
-/** The four groups, ranked most-blocking first. Mirrors FollowUpEmail's constants. */
-export type FollowUpSegment =
-  | 'fair_no_form'
-  | 'no_account'
-  | 'no_resume'
-  | 'thanks_only';
-
-export const SEGMENT_LABELS: Record<string, string> = {
-  fair_no_form: 'Scanned, never joined',
-  no_account: 'Joined, no account',
-  no_resume: 'Account, no resume',
-  thanks_only: 'All done',
-};
-
-/** What the email actually asks of them, so an officer can see it without sending one. */
-export const SEGMENT_HELP: Record<string, string> = {
-  fair_no_form: 'Fill in the membership form. The link comes prefilled with what they gave us at the table.',
-  no_account: 'Set a password so they can sign in. They are on the roster already.',
-  no_resume: 'Upload a resume, because that is what sponsors see.',
-  thanks_only: 'Nothing. They came to the fair and have everything done, so it is a thank you and no ask.',
-};
-
-export type FollowUpSegmentPreview = {
-  segment: FollowUpSegment;
+export type ResumePushSegmentPreview = {
+  segment: ResumePushSegment;
   people: number;
   alreadySent: number;
   toSend: number;
 };
 
-/** Mirrors FollowUpService.Preview. */
-export type FollowUpPreview = {
+/** Mirrors ResumePushService.Preview. */
+export type ResumePushPreview = {
   campaign: string;
-  segments: FollowUpSegmentPreview[];
+  subject: string;
+  segments: ResumePushSegmentPreview[];
   people: number;
   alreadySent: number;
   toSend: number;
-  /** Addresses, not people. Roughly double, since most have a school and a personal one. */
+  /** Addresses, not people. Most have a school and a personal one. */
   recipients: number;
   maxPerRun: number;
 };
 
-/** Mirrors FollowUpService.SendResult. */
-export type FollowUpSendResult = {
+/** Mirrors ResumePushService.SendResult. */
+export type ResumePushSendResult = {
   sent: number;
   skipped: number;
   failed: string[];
   remaining: number;
 };
 
-/** Mirrors AdminPortalService.EventSignupSummary. One row per event. */
-export type EventSignupSummary = {
-  eventSlug: string;
-  scans: number;
+/** Mirrors ResumePushService.Results. One row per version, plus segment "all". */
+export type ResumePushResults = {
+  segment: ResumePushSegment | 'all';
   emailed: number;
-  /** Scans that went on to a members row, whether or not they set a password. */
-  joined: number;
-  activated: number;
-  firstAt: string | null;
-  lastAt: string | null;
+  /** Pressed the button at least once. Mail scanners are filtered out, not perfectly. */
+  clicked: number;
+  activatedSince: number;
+  uploaded: number;
+  stillMissing: number;
+  clickedNotUploaded: number;
+  medianHoursToUpload: number | null;
+};
+
+/** Mirrors ResumePushService.Stuck. Clicked, still no resume. */
+export type ResumePushStuck = {
+  name: string | null;
+  email: string;
+  segment: ResumePushSegment;
+  activatedNow: boolean;
+  firstClickAt: string;
+};
+
+export type ResumePushReport = {
+  results: ResumePushResults[];
+  stuck: ResumePushStuck[];
 };
 
 export type Unmatched = {

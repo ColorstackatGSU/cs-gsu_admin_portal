@@ -11,8 +11,7 @@ import UnmatchedPayments from './pages/UnmatchedPayments';
 import Members from './pages/Members';
 import MemberDetail from './pages/MemberDetail';
 import MemberEmail from './pages/MemberEmail';
-import EventSignups from './pages/EventSignups';
-import FollowUp from './pages/FollowUp';
+import ResumePush from './pages/ResumePush';
 import BotOverview from './pages/BotOverview';
 import BotQueue from './pages/BotQueue';
 import BotLinks from './pages/BotLinks';
@@ -48,14 +47,9 @@ export default function App() {
         <Route path="members/:id" element={<ProtectedRoute><MemberDetail /></ProtectedRoute>} />
         <Route path="members/email" element={<ProtectedRoute><MemberEmail /></ProtectedRoute>} />
 
-        {/* Tabling attendance. Read-only: the rows come from the public QR endpoint,
-            and a signup is a record of something that happened rather than something
-            an officer should be editing. */}
-        <Route path="fair" element={<ProtectedRoute><EventSignups /></ProtectedRoute>} />
-
-        {/* The segmented follow-up. One email per person, and the only screen here whose
-            button cannot be undone, so it shows the arithmetic before it offers to run. */}
-        <Route path="follow-up" element={<ProtectedRoute><FollowUp /></ProtectedRoute>} />
+        {/* The resume push. One email per member with no resume, and a button that cannot be
+            undone, so it shows the arithmetic before it offers to run and the results after. */}
+        <Route path="resume-push" element={<ProtectedRoute><ResumePush /></ProtectedRoute>} />
 
         {/* Discord. The bot used to be its own deployment with its own state; these four
             screens are the officer-facing half of absorbing it, and /bot/queue is the one
