@@ -93,6 +93,25 @@ export type Member = {
   createdAt: string;
 };
 
+/** Which address a correction fixes. Mirrors AdminPortalService.EmailField. */
+export type EmailField = 'SCHOOL' | 'PERSONAL';
+
+/** Mirrors AdminPortalController.CorrectEmailResult. */
+export type CorrectEmailResult = {
+  member: Member;
+  /** False when the address was fixed but the email to the member did not go out. */
+  emailed: boolean;
+  emailProblem: string | null;
+};
+
+/**
+ * Only before the account is claimed. Afterwards the school address is their login and the
+ * personal one has a verified flow the member runs, and the backend refuses either way.
+ */
+export function canCorrectEmail(member: Member): boolean {
+  return member.userId == null && member.activatedAt == null;
+}
+
 /* ---- Resume push ---------------------------------------------------------- */
 
 /** The two versions of the email. Mirrors ResumePushEmail's constants. */
