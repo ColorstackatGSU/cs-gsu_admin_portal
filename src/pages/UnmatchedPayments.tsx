@@ -4,6 +4,7 @@ import { api } from '../lib/api';
 import { errorMessage, type Invoice, type Unmatched } from '../lib/admin';
 import { formatDate, formatMoney } from '../lib/format';
 import { refreshUnmatched } from '../hooks/useUnmatchedCount';
+import Confirm from '../components/Confirm';
 import { Empty, ErrorNote, Loading, OkNote } from '../components/Form';
 
 /**
@@ -153,6 +154,8 @@ function PaymentRow({
 }) {
   const [choice, setChoice] = useState('');
   const [busy, setBusy] = useState<'link' | 'dismiss' | null>(null);
+  /** Dismissing takes the payment out of the queue for good, so it is confirmed here first. */
+  const [confirmingDismiss, setConfirmingDismiss] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // The backend compares amounts exactly, so split the drafts by whether they
@@ -178,16 +181,7 @@ function PaymentRow({
 
   async function dismiss() {
     if (busy) return;
-    const who = payment.buyerCompany || payment.buyerEmail || 'this payer';
-    if (
-      !window.confirm(
-        `Dismiss the ${formatMoney(payment.amountCents)} payment from ${who}? ` +
-          'It disappears from this queue for good and no invoice is touched. ' +
-          'Only do this for duplicates, test payments, or money that is not sponsorship.',
-      )
-    ) {
-      return;
-    }
+    setConfirmingDismiss(false);
     setError(null);
     setBusy('dismiss');
     try {
@@ -281,12 +275,32 @@ function PaymentRow({
           <button
             type="button"
             className="btn btn-danger"
-            disabled={busy !== null}
-            onClick={dismiss}
+            disabled={busy !== null || confirmingDismiss}
+            onClick={() => setConfirmingDismiss(true)}
           >
             {busy === 'dismiss' ? 'Dismissing…' : 'Dismiss'}
           </button>
         </div>
+
+        {confirmingDismiss && (
+          <Confirm
+            style={{ marginTop: 12 }}
+            question={`Dismiss the ${formatMoney(payment.amountCents)} payment from ${
+              payment.buyerCompany || payment.buyerEmail || 'this payer'
+            }?`}
+            points={[
+              'It leaves this queue for good.',
+              'No invoice is touched.',
+              'Only do this for duplicates, test payments, or money that is not sponsorship.',
+            ]}
+            confirmLabel="Dismiss it"
+            busyLabel="Dismissing…"
+            busy={busy === 'dismiss'}
+            danger
+            onConfirm={() => void dismiss()}
+            onCancel={() => setConfirmingDismiss(false)}
+          />
+        )}
       </div>
     </div>
   );

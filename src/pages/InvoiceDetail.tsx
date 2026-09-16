@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import { errorMessage, type Invoice } from '../lib/admin';
+import Confirm from '../components/Confirm';
 import {
   daysUntil,
   displayStatus,
@@ -45,6 +46,8 @@ export default function InvoiceDetail() {
   const [done, setDone] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [busy, setBusy] = useState<'issue' | 'void' | null>(null);
+  /** Voiding cannot be undone, so it is confirmed under the buttons first. */
+  const [confirmingVoid, setConfirmingVoid] = useState(false);
 
   useEffect(() => {
     api
@@ -77,12 +80,7 @@ export default function InvoiceDetail() {
 
   async function voidInvoice() {
     if (busy || !invoice) return;
-    const paid = invoice.status === 'paid' || invoice.status === 'processing';
-    const question = paid
-      ? `This invoice is marked ${invoice.status}. Voiding it does not refund anything — it only stops us counting it. Void ${invoice.title}?`
-      : `Void ${invoice.title}? It stops being payable and cannot be un-voided. Raise a new invoice if you need to correct it.`;
-    if (!window.confirm(question)) return;
-
+    setConfirmingVoid(false);
     setError(null);
     setDone(null);
     setBusy('void');
@@ -181,14 +179,38 @@ export default function InvoiceDetail() {
             <button
               type="button"
               className="btn btn-danger"
-              onClick={voidInvoice}
-              disabled={busy !== null}
+              onClick={() => setConfirmingVoid(true)}
+              disabled={busy !== null || confirmingVoid}
             >
               {busy === 'void' ? 'Voiding…' : 'Void invoice'}
             </button>
           )}
         </div>
       </header>
+
+      {confirmingVoid && (
+        <Confirm
+          style={{ marginBottom: 22 }}
+          question={`Void ${invoice.title}?`}
+          points={
+            invoice.status === 'paid' || invoice.status === 'processing'
+              ? [
+                  `This invoice is marked ${invoice.status}. Voiding it refunds nothing — it only stops us counting it.`,
+                  'It cannot be un-voided.',
+                ]
+              : [
+                  'It stops being payable.',
+                  'It cannot be un-voided. Raise a new invoice if you need to correct it.',
+                ]
+          }
+          confirmLabel="Void it"
+          busyLabel="Voiding…"
+          busy={busy === 'void'}
+          danger
+          onConfirm={() => void voidInvoice()}
+          onCancel={() => setConfirmingVoid(false)}
+        />
+      )}
 
       <ErrorNote message={error} />
       <OkNote message={done} />

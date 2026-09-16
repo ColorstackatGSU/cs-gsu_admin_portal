@@ -16,6 +16,7 @@ import {
   type Tier,
 } from '../lib/admin';
 import { ROLE_HELP, displayStatus, formatDate, formatMoney } from '../lib/format';
+import Confirm from '../components/Confirm';
 import StatusPill, { ContactPill, SponsorPill } from '../components/StatusPill';
 import { Empty, ErrorNote, Field, OkNote, Select } from '../components/Form';
 
@@ -378,6 +379,8 @@ function LogoCard({ sponsorId }: { sponsorId: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
+  /** Deleting the file cannot be undone, so it is confirmed in the card first. */
+  const [confirmingClear, setConfirmingClear] = useState(false);
 
   async function upload(file: File) {
     setError(null);
@@ -394,9 +397,7 @@ function LogoCard({ sponsorId }: { sponsorId: string }) {
   }
 
   async function clear() {
-    if (!window.confirm('Remove this sponsor’s logo? Their portal falls back to no logo.')) {
-      return;
-    }
+    setConfirmingClear(false);
     setError(null);
     setDone(null);
     setBusy(true);
@@ -438,13 +439,30 @@ function LogoCard({ sponsorId }: { sponsorId: string }) {
           <button
             type="button"
             className="btn btn-danger btn-sm"
-            disabled={busy}
-            onClick={clear}
+            disabled={busy || confirmingClear}
+            onClick={() => setConfirmingClear(true)}
           >
             Remove logo
           </button>
           {busy && <span className="muted">Working…</span>}
         </div>
+
+        {confirmingClear && (
+          <Confirm
+            style={{ marginTop: 12 }}
+            question="Remove this sponsor’s logo?"
+            points={[
+              'Their portal falls back to no logo.',
+              'The file is deleted, so putting it back means uploading it again.',
+            ]}
+            confirmLabel="Remove it"
+            busyLabel="Removing…"
+            busy={busy}
+            danger
+            onConfirm={() => void clear()}
+            onCancel={() => setConfirmingClear(false)}
+          />
+        )}
 
         <p className="hint">
           PNG, JPEG, WebP or SVG, 1 MB max. Uploading replaces the current logo

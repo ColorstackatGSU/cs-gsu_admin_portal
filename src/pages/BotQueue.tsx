@@ -9,6 +9,7 @@ import {
   type Attempt,
 } from '../lib/discord';
 import { refreshBotQueue } from '../hooks/useBotQueueCount';
+import Confirm from '../components/Confirm';
 import { Empty, ErrorNote, Loading, OkNote } from '../components/Form';
 
 /**
@@ -170,6 +171,8 @@ function AttemptRow({
   const [note, setNote] = useState('');
   const [notifyMember, setNotifyMember] = useState(true);
   const [busy, setBusy] = useState<'link' | 'reject' | null>(null);
+  /** Turning somebody down may DM them, so it is confirmed under the buttons first. */
+  const [confirmingReject, setConfirmingReject] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const resolved = attempt.status !== 'pending';
@@ -208,14 +211,7 @@ function AttemptRow({
 
   async function reject() {
     if (busy) return;
-    if (
-      !window.confirm(
-        `Turn down the verification request from ${attempt.discordUsername}? ` +
-          'They stay in the server with no chapter access. They can click Verify again later.',
-      )
-    ) {
-      return;
-    }
+    setConfirmingReject(false);
     setError(null);
     setBusy('reject');
     try {
@@ -361,12 +357,32 @@ function AttemptRow({
               <button
                 type="button"
                 className="btn btn-danger"
-                disabled={busy !== null}
-                onClick={reject}
+                disabled={busy !== null || confirmingReject}
+                onClick={() => setConfirmingReject(true)}
               >
                 {busy === 'reject' ? 'Turning down…' : 'Turn down'}
               </button>
             </div>
+
+            {confirmingReject && (
+              <Confirm
+                style={{ marginTop: 12 }}
+                question={`Turn down the verification request from ${attempt.discordUsername}?`}
+                points={[
+                  'They stay in the server with no chapter access.',
+                  'They can click Verify again later.',
+                  notifyMember
+                    ? 'We DM them the outcome, with your note if you wrote one.'
+                    : 'They are not told, because "DM them the outcome" is unticked.',
+                ]}
+                confirmLabel="Turn them down"
+                busyLabel="Turning down…"
+                busy={busy === 'reject'}
+                danger
+                onConfirm={() => void reject()}
+                onCancel={() => setConfirmingReject(false)}
+              />
+            )}
           </>
         )}
       </div>

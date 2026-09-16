@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { api } from '../lib/api';
 import { errorMessage, type Member } from '../lib/admin';
+import Confirm from '../components/Confirm';
 import RichTextEditor from '../components/RichTextEditor';
 
 /**
@@ -46,6 +47,8 @@ export default function MemberEmail() {
     '<p>Hi {{first_name}},</p><p><br></p><p><br></p><p>Cheers,<br>ColorStack at GSU</p>'
   );
   const [sending, setSending] = useState(false);
+  /** A send reaches inboxes and cannot be recalled, so it is confirmed above the button. */
+  const [confirming, setConfirming] = useState(false);
   const [result, setResult] = useState<SendResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -109,17 +112,16 @@ export default function MemberEmail() {
     setSelected(new Set());
   }
 
-  async function onSend(e: FormEvent) {
+  function onSend(e: FormEvent) {
     e.preventDefault();
     setError(null);
     setResult(null);
     if (selected.size === 0) return;
+    setConfirming(true);
+  }
 
-    const confirmed = window.confirm(
-      `Send to ${selected.size} member${selected.size === 1 ? '' : 's'}?`
-    );
-    if (!confirmed) return;
-
+  async function send() {
+    setConfirming(false);
     setSending(true);
     try {
       const r = await api.post<SendResult>('/admin/members/email', {
@@ -289,10 +291,28 @@ export default function MemberEmail() {
             </div>
           </section>
 
+          {confirming && (
+            <Confirm
+              style={{ marginBottom: 16 }}
+              question={`Send to ${selected.size} member${selected.size === 1 ? '' : 's'}?`}
+              points={[
+                'Each gets their own copy, at their school address and their personal one if we have it.',
+                'Sent mail cannot be recalled.',
+              ]}
+              confirmLabel={`Send to ${selected.size}`}
+              busyLabel="Sending…"
+              busy={sending}
+              onConfirm={() => void send()}
+              onCancel={() => setConfirming(false)}
+            />
+          )}
+
           <button
             type="submit"
             className="btn btn-primary"
-            disabled={sending || selected.size === 0 || !subject.trim() || !body.trim()}
+            disabled={
+              sending || confirming || selected.size === 0 || !subject.trim() || !body.trim()
+            }
           >
             {sending
               ? 'Sending…'

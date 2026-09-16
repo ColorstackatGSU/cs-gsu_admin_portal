@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { errorMessage } from '../lib/admin';
 import { memberName, type DiscordLink } from '../lib/discord';
+import Confirm from '../components/Confirm';
 import { Empty, ErrorNote, Loading, OkNote } from '../components/Form';
 
 type Filter = 'linked' | 'unlinked' | 'all';
@@ -25,6 +26,8 @@ export default function BotLinks() {
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
+  /** The row whose Unlink is waiting to be confirmed, under that row. */
+  const [confirming, setConfirming] = useState<DiscordLink | null>(null);
 
   const load = useCallback(async () => {
     const query =
@@ -76,19 +79,11 @@ export default function BotLinks() {
 
   async function unlink(row: DiscordLink) {
     if (busy) return;
-    if (
-      !window.confirm(
-        `Unlink ${memberName(row)} from Discord account ${row.discordUserId}?\n\n` +
-          'Their chapter roles in the server are removed too. They can click Verify again ' +
-          'to get them back, as long as the Discord handle on their profile is right.',
-      )
-    ) {
-      return;
-    }
     setBusy(row.memberId);
     setError(null);
     try {
       await api.post(`/admin/discord/links/${row.memberId}/unlink`, { revokeRoles: true });
+      setConfirming(null);
       setDone(`Unlinked ${memberName(row)} and removed their roles.`);
       setLoaded({ filter, rows: await load() });
     } catch (e) {
@@ -200,7 +195,8 @@ export default function BotLinks() {
                   const handle = row.discordUsername?.trim().toLowerCase();
                   const duplicate = handle ? duplicates.has(handle) : false;
                   return (
-                    <tr key={row.memberId}>
+                    <Fragment key={row.memberId}>
+                    <tr>
                       <td>
                         <Link className="link" to={`/members/${row.memberId}`}>
                           {memberName(row)}
@@ -255,7 +251,7 @@ export default function BotLinks() {
                               type="button"
                               className="btn btn-danger btn-sm"
                               disabled={busy !== null}
-                              onClick={() => void unlink(row)}
+                              onClick={() => setConfirming(row)}
                             >
                               {busy === row.memberId ? '…' : 'Unlink'}
                             </button>
@@ -263,6 +259,26 @@ export default function BotLinks() {
                         )}
                       </td>
                     </tr>
+                    {confirming?.memberId === row.memberId && (
+                      <tr>
+                        <td colSpan={5} style={{ paddingTop: 0 }}>
+                          <Confirm
+                            question={`Unlink ${memberName(row)} from Discord account ${row.discordUserId}?`}
+                            points={[
+                              'Their chapter roles in the server are removed too.',
+                              'They can click Verify again to get them back, as long as the Discord handle on their profile is right.',
+                            ]}
+                            confirmLabel="Unlink and remove roles"
+                            busyLabel="Unlinking…"
+                            busy={busy === row.memberId}
+                            danger
+                            onConfirm={() => void unlink(row)}
+                            onCancel={() => setConfirming(null)}
+                          />
+                        </td>
+                      </tr>
+                    )}
+                    </Fragment>
                   );
                 })}
               </tbody>

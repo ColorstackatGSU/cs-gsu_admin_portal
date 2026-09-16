@@ -9,6 +9,7 @@ import {
   type EmailField,
   type Member,
 } from '../lib/admin';
+import Confirm from '../components/Confirm';
 import VerifiedBadge from '../components/VerifiedBadge';
 
 /**
@@ -285,51 +286,34 @@ function EmailRow({
       )}
 
       {editing && confirming !== null && (
-        <div
-          className="note note-warn"
+        <Confirm
           style={{ marginLeft: 156, marginBottom: 12, maxWidth: 440 }}
-        >
-          <p style={{ margin: '0 0 8px', fontWeight: 700 }}>
-            Change {current} to {confirming}?
-          </p>
-          <ul style={{ margin: '0 0 12px', paddingLeft: 18 }}>
-            {claimed && field === 'SCHOOL' ? (
-              <>
-                <li>They will sign in with {confirming} from now on. {current} will stop working.</li>
-                <li>Their password stays the same.</li>
-                <li>We email them at {confirming} to say the address changed.</li>
-              </>
-            ) : (
-              <>
-                <li>We email {confirming} with a code to set up their account.</li>
-                <li>Their welcome email went to {current}, so this is the first they will hear.</li>
-              </>
-            )}
-            <li>Nothing is sent to {current}, in case it belongs to somebody else.</li>
-            <li>The membership form still says {current}, and syncing it will not undo this.</li>
-          </ul>
-          {problem && <div className="field-error" style={{ marginBottom: 8 }}>{problem}</div>}
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button
-              type="button"
-              className="btn btn-primary btn-sm"
-              onClick={save}
-              disabled={saving}
-              autoFocus
-            >
-              {saving ? 'Saving…' : 'Change it and email them'}
-            </button>
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={() => setConfirming(null)}
-              disabled={saving}
-            >
-              Back
-            </button>
-          </div>
-        </div>
+          question={`Change ${current} to ${confirming}?`}
+          points={
+            claimed && field === 'SCHOOL'
+              ? [
+                  `They sign in with ${confirming} from now on. ${current} stops working.`,
+                  'Their password does not change.',
+                  `We email ${confirming} to say the address changed.`,
+                  `Nothing is sent to ${current}, in case it belongs to somebody else.`,
+                  `The membership form still says ${current}, and syncing it will not undo this.`,
+                ]
+              : [
+                  `We email ${confirming} with a code to set up their account.`,
+                  `Their welcome email went to ${current}, so this is the first they will hear.`,
+                  `Nothing is sent to ${current}, in case it belongs to somebody else.`,
+                  `The membership form still says ${current}, and syncing it will not undo this.`,
+                ]
+          }
+          confirmLabel="Change it and email them"
+          busy={saving}
+          busyLabel="Saving…"
+          problem={problem}
+          onConfirm={save}
+          onCancel={() => setConfirming(null)}
+        />
       )}
+
       {done && (
         <div
           className={`note ${done.ok ? 'note-ok' : 'note-warn'}`}
