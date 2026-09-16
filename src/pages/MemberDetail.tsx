@@ -4,6 +4,7 @@ import { api } from '../lib/api';
 import {
   canCorrectEmail,
   errorMessage,
+  hasClaimedAccount,
   type CorrectEmailResult,
   type EmailField,
   type Member,
@@ -14,11 +15,10 @@ import VerifiedBadge from '../components/VerifiedBadge';
  * Officer view of one member. All fields visible, plus a "View resume" button that fetches
  * a fresh short-lived signed URL.
  *
- * The one thing an officer can change is an address mistyped on the membership form, and
- * only before the account is claimed. Everything else stays read-only: members own their
- * profile in the member portal, and an admin edit path that overwrites their answers would
- * erode that trust. A typo is different because it is the thing locking them out of the
- * portal where they would fix it themselves.
+ * The one thing an officer can change is an address mistyped on the membership form.
+ * Everything else stays read-only: members own their profile in the member portal, and an
+ * admin edit path that overwrites their answers would erode that trust. A typo is different
+ * because it is the thing locking them out of the portal where they would fix it themselves.
  */
 export default function MemberDetail() {
   const { id } = useParams<{ id: string }>();
@@ -61,7 +61,7 @@ export default function MemberDetail() {
   if (!member) return <div className="wrap"><p>Loading…</p></div>;
 
   const name = [member.firstName, member.lastName].filter(Boolean).join(' ') || member.email;
-  const fixable = canCorrectEmail(member);
+  const claimed = hasClaimedAccount(member);
 
   return (
     <div className="wrap">
@@ -76,20 +76,22 @@ export default function MemberDetail() {
           label="School email"
           field="SCHOOL"
           member={member}
-          fixable={fixable}
+          fixable={canCorrectEmail(member, 'SCHOOL')}
+          claimed={claimed}
           onFixed={setMember}
         />
         <EmailRow
           label="Personal email"
           field="PERSONAL"
           member={member}
-          fixable={fixable && member.personalEmail != null}
+          fixable={canCorrectEmail(member, 'PERSONAL') && member.personalEmail != null}
+          claimed={claimed}
           onFixed={setMember}
         />
-        {!fixable && (
+        {claimed && (
           <p className="hint" style={{ marginLeft: 156 }}>
-            Their account is set up, so these cannot be fixed here. The school address is their
-            login, and they can change their personal one from their profile.
+            Their account is set up: fixing the school address moves what they sign in with, and
+            their personal one is theirs to change from their profile.
           </p>
         )}
         <Field label="Pronouns" value={member.pronouns} />
@@ -150,21 +152,28 @@ export default function MemberDetail() {
 /**
  * One address, with a "Fix typo" button that opens an inline form.
  *
- * Saving changes the address and emails the member at the corrected one with a fresh
- * activation code, since their welcome email went to the typo. The typo itself is never
- * written to: whoever owns that address is not the member.
+ * Saving changes the address and emails the member at the corrected one. The typo itself is
+ * never written to: whoever owns that address is not the member.
+ *
+ * The confirmation is part of the page rather than window.confirm, because what this does
+ * depends on the member and a native dialog cannot show it. Correcting a claimed school
+ * address moves the address they sign in with; correcting an unclaimed one sends the welcome
+ * mail that went to the typo. An officer should be able to read which of the two they are
+ * about to do, in the same type as the rest of the page.
  */
 function EmailRow({
   label,
   field,
   member,
   fixable,
+  claimed,
   onFixed,
 }: {
   label: string;
   field: EmailField;
   member: Member;
   fixable: boolean;
+  claimed: boolean;
   onFixed: (member: Member) => void;
 }) {
   const current = field === 'SCHOOL' ? member.email : member.personalEmail;
@@ -173,15 +182,24 @@ function EmailRow({
   const [saving, setSaving] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const [done, setDone] = useState<{ ok: boolean; text: string } | null>(null);
+  /** The address waiting to be confirmed. Null while the officer is still typing. */
+  const [confirming, setConfirming] = useState<string | null>(null);
 
   function open() {
     setDraft(current ?? '');
     setProblem(null);
     setDone(null);
+    setConfirming(null);
     setEditing(true);
   }
 
-  async function save(e: React.FormEvent) {
+  function close() {
+    setEditing(false);
+    setConfirming(null);
+    setProblem(null);
+  }
+
+  function review(e: React.FormEvent) {
     e.preventDefault();
     const next = draft.trim().toLowerCase();
     if (!next || saving) return;
@@ -189,14 +207,13 @@ function EmailRow({
       setProblem('That is already the address on file.');
       return;
     }
-    if (
-      !window.confirm(
-        `Change ${current} to ${next}?\n\n` +
-          `We will email ${next} to say the address was fixed, with a code to set up their account.`,
-      )
-    ) {
-      return;
-    }
+    setProblem(null);
+    setConfirming(next);
+  }
+
+  async function save() {
+    const next = confirming;
+    if (!next || saving) return;
 
     setSaving(true);
     setProblem(null);
@@ -206,19 +223,26 @@ function EmailRow({
         { field, newEmail: next },
       );
       onFixed(result.member);
-      setEditing(false);
+      close();
       setDone(
         result.emailed
-          ? { ok: true, text: `Fixed. We emailed ${next} with a code to set up their account.` }
+          ? {
+              ok: true,
+              text:
+                claimed && field === 'SCHOOL'
+                  ? `Fixed. They sign in with ${next} from now on, and we emailed them to say so.`
+                  : `Fixed. We emailed ${next} with a code to set up their account.`,
+            }
           : {
               ok: false,
               text:
                 `Fixed, but the email did not send: ${result.emailProblem ?? 'unknown error'} ` +
-                'They can still request a code on the activation page with the corrected address.',
+                'Tell them yourself, or they will not know the address changed.',
             },
       );
     } catch (err) {
       setProblem(errorMessage(err));
+      setConfirming(null);
     } finally {
       setSaving(false);
     }
@@ -237,8 +261,8 @@ function EmailRow({
           ) : undefined
         }
       />
-      {editing && (
-        <form onSubmit={save} style={{ marginLeft: 156, marginBottom: 12, maxWidth: 420 }}>
+      {editing && confirming === null && (
+        <form onSubmit={review} style={{ marginLeft: 156, marginBottom: 12, maxWidth: 440 }}>
           <label className="field" style={{ marginBottom: 8 }}>
             <span className="label">Correct {label.toLowerCase()}</span>
             <input
@@ -248,24 +272,63 @@ function EmailRow({
               autoFocus
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              disabled={saving}
             />
             {problem && <div className="field-error">{problem}</div>}
           </label>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button type="submit" className="btn btn-primary btn-sm" disabled={saving}>
-              {saving ? 'Saving…' : 'Save and email them'}
-            </button>
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={() => setEditing(false)}
-              disabled={saving}
-            >
+            <button type="submit" className="btn btn-primary btn-sm">Review</button>
+            <button type="button" className="btn btn-secondary btn-sm" onClick={close}>
               Cancel
             </button>
           </div>
         </form>
+      )}
+
+      {editing && confirming !== null && (
+        <div
+          className="note note-warn"
+          style={{ marginLeft: 156, marginBottom: 12, maxWidth: 440 }}
+        >
+          <p style={{ margin: '0 0 8px', fontWeight: 700 }}>
+            Change {current} to {confirming}?
+          </p>
+          <ul style={{ margin: '0 0 12px', paddingLeft: 18 }}>
+            {claimed && field === 'SCHOOL' ? (
+              <>
+                <li>They will sign in with {confirming} from now on. {current} will stop working.</li>
+                <li>Their password stays the same.</li>
+                <li>We email them at {confirming} to say the address changed.</li>
+              </>
+            ) : (
+              <>
+                <li>We email {confirming} with a code to set up their account.</li>
+                <li>Their welcome email went to {current}, so this is the first they will hear.</li>
+              </>
+            )}
+            <li>Nothing is sent to {current}, in case it belongs to somebody else.</li>
+            <li>The membership form still says {current}, and syncing it will not undo this.</li>
+          </ul>
+          {problem && <div className="field-error" style={{ marginBottom: 8 }}>{problem}</div>}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              type="button"
+              className="btn btn-primary btn-sm"
+              onClick={save}
+              disabled={saving}
+              autoFocus
+            >
+              {saving ? 'Saving…' : 'Change it and email them'}
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={() => setConfirming(null)}
+              disabled={saving}
+            >
+              Back
+            </button>
+          </div>
+        </div>
       )}
       {done && (
         <div

@@ -104,12 +104,21 @@ export type CorrectEmailResult = {
   emailProblem: string | null;
 };
 
+/** True once they have an account, which changes what correcting an address means. */
+export function hasClaimedAccount(member: Member): boolean {
+  return member.userId != null || member.activatedAt != null;
+}
+
 /**
- * Only before the account is claimed. Afterwards the school address is their login and the
- * personal one has a verified flow the member runs, and the backend refuses either way.
+ * A school address is always correctable: it is the one people mistype, and the backend
+ * moves their sign-in with it when they already have an account.
+ *
+ * A personal address only before they claim. Afterwards it is theirs to change from their
+ * profile, through a flow that mails the new address to prove they hold it, and the backend
+ * refuses to skip that.
  */
-export function canCorrectEmail(member: Member): boolean {
-  return member.userId == null && member.activatedAt == null;
+export function canCorrectEmail(member: Member, field: EmailField): boolean {
+  return field === 'SCHOOL' || !hasClaimedAccount(member);
 }
 
 /* ---- Resume push ---------------------------------------------------------- */
