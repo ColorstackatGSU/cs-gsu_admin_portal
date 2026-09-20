@@ -17,6 +17,7 @@ import BotQueue from './pages/BotQueue';
 import BotLinks from './pages/BotLinks';
 import BotHealth from './pages/BotHealth';
 import SponsorView from './pages/SponsorView';
+import Access from './pages/Access';
 import NotFound from './pages/NotFound';
 
 /**
@@ -58,6 +59,10 @@ export default function App() {
         <Route path="bot/queue" element={<ProtectedRoute><BotQueue /></ProtectedRoute>} />
         <Route path="bot/links" element={<ProtectedRoute><BotLinks /></ProtectedRoute>} />
         <Route path="bot/health" element={<ProtectedRoute><BotHealth /></ProtectedRoute>} />
+
+        {/* Who can sign in here, and who can sign in to the Tech League's admin page.
+            Kept last because it is the screen that hands out the other screens. */}
+        <Route path="access" element={<ProtectedRoute><Access /></ProtectedRoute>} />
 
         <Route path="*" element={<NotFound />} />
       </Route>

@@ -33,6 +33,8 @@ const NAV = [
   { to: '/resume-push', label: 'Resume push', icon: IconSend, badge: 'none' },
   { to: '/unmatched', label: 'Unmatched', icon: IconAlert, badge: 'unmatched' },
   { to: '/bot', label: 'Discord', icon: IconDiscord, badge: 'bot' },
+  // Last on purpose: this is the screen that hands out every other screen.
+  { to: '/access', label: 'Access', icon: IconKey, badge: 'none' },
 ] as const;
 
 export default function Sidebar() {
@@ -160,6 +162,16 @@ export default function Sidebar() {
 /* ============ ICONS ============ */
 /* All 20x20, stroke 2.25, currentColor. Heavier than the usual feather weight so
    they carry the same visual mass as the 3px frames around them. */
+
+function IconKey() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="8" cy="8" r="4.5" />
+      <path d="M11.5 11.5 20 20" />
+      <path d="M17 17l2.5-2.5" />
+    </svg>
+  );
+}
 
 function IconBuilding() {
   return (
