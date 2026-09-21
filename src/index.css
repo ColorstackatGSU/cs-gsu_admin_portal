@@ -1756,4 +1756,221 @@ select.input:focus {
   .tl-scroll-hint { display: block; }
 }
 
+/* ============================================================================
+   TECH LEAGUE SCOPE, PART TWO: everything that is not colour
+   ============================================================================
+   The first scope block swapped the palette and left the rest of the portal
+   underneath it: Space Grotesk, 3px ink frames, hard offset shadows, square
+   corners, a dotted cream ground recoloured dark. Neon paint on neobrutalist
+   furniture. Recognisably this portal wearing the other one's colours rather
+   than the other system.
 
+   This block finishes the crossing. Type, ground, borders, depth and icon
+   weight all move to what the Tech League actually uses, and they move through
+   the same tokens, so no component is forked and nothing outside .tl-scope is
+   touched.
+
+   The one thing kept from the portal is the layout. Screens do not reflow on
+   the way in: the sidebar stays 248px, cards keep their padding, tables keep
+   their columns. Changing the furniture is a scheme change, changing where
+   things are would be disorienting.
+   ========================================================================== */
+
+.tl-scope {
+  /* ---- Type ------------------------------------------------------------
+     Barlow for body, which is the Tech League's own body face and is not
+     otherwise loaded here. Archivo for display, already loaded and already
+     used by the headings in the first block, now the token so everything
+     picking up --display comes with it. */
+  --font: 'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --display: 'Archivo', 'Barlow', system-ui, sans-serif;
+  --mono: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, monospace;
+
+  /* ---- Structure -------------------------------------------------------
+     The portal draws structure with weight: a 3px ink frame on everything,
+     square, with a solid offset shadow. The Tech League draws it with a
+     hairline and a lit edge. --bw is read in 44 places, so this one line is
+     most of the change. */
+  --bw: 1px;
+  --bw-thin: 1px;
+  --radius: 10px;
+  --radius-lg: 14px;
+
+  /* An ink shadow is invisible on the pitch. Depth is a cast below plus a
+     faint highlight along the top edge, which is what reads as lit. */
+  --shadow-sm: 0 1px 0 rgba(242, 246, 255, 0.05), 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow: 0 1px 0 rgba(242, 246, 255, 0.06), 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 1px 0 rgba(242, 246, 255, 0.07), 0 18px 48px rgba(0, 0, 0, 0.55);
+
+  font-family: var(--font);
+}
+
+/* ---- The ground ------------------------------------------------------------
+   Stadium air, lifted from the Tech League's own body::before: floodlight bloom
+   in three corners over a faint pitch grid. The portal's dot field is gone
+   rather than recoloured, because a dot grid is a paper texture and this is
+   meant to read as a lit space.
+
+   Painted on .shell-app itself rather than a pseudo element on body: the shell
+   is what carries the portal's ground today, and keeping it there means the
+   scope class is still the only thing that decides which ground shows. */
+.tl-scope .shell-app,
+.tl-scope .shell-auth {
+  background-color: var(--canvas);
+  background-image:
+    radial-gradient(ellipse 80% 55% at 50% -10%, rgba(77, 124, 254, 0.16), transparent 70%),
+    radial-gradient(ellipse 60% 45% at 8% 20%, rgba(61, 240, 127, 0.08), transparent 70%),
+    radial-gradient(ellipse 55% 45% at 95% 72%, rgba(169, 112, 255, 0.10), transparent 70%),
+    linear-gradient(rgba(122, 143, 184, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(122, 143, 184, 0.045) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 64px 64px, 64px 64px;
+  background-position: 0 0, 0 0, 0 0, -1px -1px, -1px -1px;
+  background-attachment: fixed, fixed, fixed, fixed, fixed;
+}
+
+/* ---- Corners ---------------------------------------------------------------
+   --radius exists in the token set but nothing reads it: the portal is square
+   everywhere, so the rules were written without it. Rather than thread it
+   through 40-odd light-theme rules that do not want it, the surfaces that
+   should be round on the pitch are named here. */
+.tl-scope .card,
+.tl-scope .note,
+.tl-scope .input,
+.tl-scope .side-link,
+.tl-scope .side-help,
+.tl-scope .btn {
+  border-radius: var(--radius);
+}
+.tl-scope .pill,
+.tl-scope .eyebrow,
+.tl-scope .side-count,
+.tl-scope .btn-sm {
+  border-radius: 999px;
+}
+.tl-scope .side-brand img {
+  border-radius: 50%;
+}
+
+/* ---- Border colour ---------------------------------------------------------
+   Thirty-three rules in this stylesheet draw their border as
+   `var(--bw) solid var(--ink)`. On paper that is near-black and reads as
+   structure. Inside the scope --ink is near-white, so every one of them became
+   a bright hairline, brighter than any edge the Tech League itself draws, and
+   the screen looked wireframed.
+
+   The list is exact: it was extracted from the rules that actually name
+   var(--ink) as a border colour, not guessed at. :focus-visible is deliberately
+   not in it, because a focus ring is the one border that should stay loud.
+
+   Borders already drawn with --line-soft or --line-strong are left alone. Those
+   are intentional distinctions and the scope already retunes both tokens. */
+.tl-scope .auth-chip,
+.tl-scope .auth-mini img,
+.tl-scope .auth-panel,
+.tl-scope .auth-panel-brand img,
+.tl-scope .auth-panel-title em,
+.tl-scope .backlink,
+.tl-scope .btn,
+.tl-scope .card,
+.tl-scope .card-flush > .card-head,
+.tl-scope .eyebrow,
+.tl-scope .form-actions,
+.tl-scope .input,
+.tl-scope .logo-row input[type='file']::file-selector-button,
+.tl-scope .meta-rule,
+.tl-scope .note,
+.tl-scope .pill,
+.tl-scope .row-go,
+.tl-scope .rte,
+.tl-scope .rte-toolbar,
+.tl-scope .side,
+.tl-scope .side-brand img,
+.tl-scope .side-burger,
+.tl-scope .side-count,
+.tl-scope .side-help,
+.tl-scope .side-link,
+.tl-scope .side-top,
+.tl-scope .side-top-brand img,
+.tl-scope .sparkbar,
+.tl-scope .sparkbars,
+.tl-scope .sponsor-logo-preview,
+.tl-scope .sticker,
+.tl-scope .tl-bars-track,
+.tl-scope .verified-badge {
+  border-color: var(--line);
+}
+
+/* ---- Depth and the press ---------------------------------------------------
+   The portal's affordance is physical: a control sits on a solid shadow and
+   presses down into it. That gesture belongs to the paper system. Here the
+   same hover lifts and lights instead, which is the Tech League's own idiom,
+   and the transform is removed rather than retuned so nothing shifts by a
+   couple of pixels under the cursor. */
+.tl-scope .side-link:hover,
+.tl-scope .side-link.active:hover,
+.tl-scope .btn:hover:not(:disabled),
+.tl-scope .btn-sm:hover:not(:disabled),
+.tl-scope .side-burger:hover {
+  transform: none;
+}
+.tl-scope .side-link:active,
+.tl-scope .btn:active:not(:disabled) {
+  transform: none;
+}
+.tl-scope .side-link:hover {
+  background: var(--surface-hover);
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-sm);
+}
+.tl-scope .side-link.active {
+  background: var(--brand-soft);
+  border-color: var(--brand);
+  color: var(--brand);
+  box-shadow: inset 0 0 0 1px rgba(61, 240, 127, 0.25);
+}
+.tl-scope .side-link.active:hover {
+  background: rgba(61, 240, 127, 0.18);
+  color: var(--brand);
+}
+.tl-scope .btn:hover:not(:disabled) {
+  box-shadow: var(--shadow-sm);
+}
+
+/* ---- Icons -----------------------------------------------------------------
+   The sidebar icons are drawn at stroke 2.25 so they carry the same visual mass
+   as a 3px frame. With the frames down to a hairline they are the heaviest
+   thing left on the screen. CSS wins over the presentation attribute, so this
+   thins them without touching a single component. */
+.tl-scope .side-link svg,
+.tl-scope .btn svg,
+.tl-scope .side-burger svg {
+  stroke-width: 1.6;
+}
+
+/* ---- The sticker -----------------------------------------------------------
+   The Sponsor view card is tilted 1.4 degrees, deliberately, as the one thing
+   in the column that is off the grid. That is a paper joke: a sticker stuck on
+   slightly crooked. There is no paper here, so it sits straight. */
+.tl-scope .side-help {
+  background: var(--surface-subtle);
+  border-color: var(--line);
+  transform: none;
+  box-shadow: var(--shadow-sm);
+}
+.tl-scope .side-help-title {
+  color: var(--ink-muted);
+}
+
+/* ---- Type detail -----------------------------------------------------------
+   Barlow sets a little tighter than Space Grotesk at the same size, and the
+   uppercase nav labels need their tracking back to stay legible on the dark. */
+.tl-scope .side-link,
+.tl-scope .btn,
+.tl-scope .eyebrow,
+.tl-scope .pill {
+  letter-spacing: 0.06em;
+}
+.tl-scope .side-brand-text {
+  font-family: var(--display);
+  font-stretch: 125%;
+}
