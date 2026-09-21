@@ -36,13 +36,10 @@ const NAV = [
   { to: '/resume-push', label: 'Resume push', icon: IconSend, badge: 'none' },
   { to: '/unmatched', label: 'Unmatched', icon: IconAlert, badge: 'unmatched' },
   { to: '/bot', label: 'Discord', icon: IconDiscord, badge: 'bot' },
+  // A prefix, like /bot: the four Tech League screens carry their own section nav
+  // across the top, so listing three of them here again only made this column
+  // taller. One row in, the sub-nav is the first thing on the page.
   { to: '/tech-league', label: 'Tech League', icon: IconTrophy, badge: 'none' },
-  // The Tech League's own workspace, indented under it. Kept in the nav rather
-  // than only reachable from the Tech League page: the review queue is the one
-  // screen here that somebody opens to do a job, not to look something up.
-  { to: '/tech-league/review', label: 'Review', icon: IconInbox, badge: 'none', sub: true },
-  { to: '/tech-league/pool', label: 'Applicant pool', icon: IconChart, badge: 'none', sub: true },
-  { to: '/tech-league/scores', label: 'Scores', icon: IconGrid, badge: 'none', sub: true },
   // Last on purpose: this is the screen that hands out every other screen.
   { to: '/access', label: 'Access', icon: IconKey, badge: 'none' },
 ] as const;
@@ -125,7 +122,6 @@ export default function Sidebar() {
         <nav className="side-nav" aria-label="Primary">
           {NAV.map((item) => {
             const { to, label, icon: Icon, badge } = item;
-            const sub = 'sub' in item && item.sub;
             const count =
               badge === 'unmatched' ? unmatched : badge === 'bot' ? botQueue : null;
             return (
@@ -134,12 +130,8 @@ export default function Sidebar() {
                 to={to}
                 // /bot is a prefix for four screens, so it stays lit on all of
                 // them; every other item is its own exact page.
-                end={to === '/bot' ? false : undefined}
-                className={({ isActive }) =>
-                  [isActive ? 'side-link active' : 'side-link', sub ? 'side-sub' : null]
-                    .filter(Boolean)
-                    .join(' ')
-                }
+                end={to === '/bot' || to === '/tech-league' ? false : undefined}
+                className={({ isActive }) => (isActive ? 'side-link active' : 'side-link')}
                 onClick={(e) => {
                   setOpen(false);
 
@@ -223,38 +215,6 @@ function IconTrophy() {
   );
 }
 
-/* The three Tech League sub-items. Drawn at the same stroke as their neighbours
-   so indenting them is the only thing that says they are a level down. */
-
-function IconInbox() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M3 13h5l1.5 3h5L16 13h5" />
-      <path d="M5.5 4.5h13l2.5 8.5v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6l2.5-8.5Z" />
-    </svg>
-  );
-}
-
-function IconChart() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M4 20h16" />
-      <path d="M6.5 20V10" />
-      <path d="M12 20V4" />
-      <path d="M17.5 20v-6" />
-    </svg>
-  );
-}
-
-function IconGrid() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <rect x="3.5" y="4.5" width="17" height="15" rx="1" />
-      <path d="M3.5 9.5h17" />
-      <path d="M9.5 9.5v10" />
-    </svg>
-  );
-}
 
 function IconKey() {
   return (

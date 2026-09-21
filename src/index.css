@@ -181,7 +181,7 @@
   padding: 20px 16px 18px;
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 18px;
   background: var(--paper);
   border-right: var(--bw) solid var(--ink);
   z-index: 40;
@@ -214,14 +214,29 @@
   color: var(--ink-muted);
 }
 
-.side-nav { display: flex; flex-direction: column; gap: 10px; flex: 1; min-height: 0; }
+/* Scrolls on its own rather than pushing Sign out off the bottom of a short
+   window. The horizontal padding plus the matching negative margin is there so
+   the 3px press-shadow on each item is not clipped by the scroll container,
+   which cannot inherit `overflow-x: visible`. */
+.side-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 4px 4px 0;
+  margin: 0 -4px -4px 0;
+  scrollbar-width: thin;
+}
 .side-foot { display: flex; flex-direction: column; gap: 12px; }
 
 .side-link {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
+  padding: 9px 12px;
   background: var(--paper);
   border: var(--bw) solid var(--ink);
   box-shadow: var(--shadow-sm);
@@ -1741,14 +1756,4 @@ select.input:focus {
   .tl-scroll-hint { display: block; }
 }
 
-/* ---- Sidebar sub-group ---------------------------------------------------- */
-/* Indented and set a size down, so the three Tech League screens read as living
-   under it rather than as three more top-level places. */
 
-.side-sub {
-  margin-left: 16px;
-  padding-top: 8px;
-  padding-bottom: 8px;
-  font-size: 11px;
-}
-.side-sub svg { width: 16px; height: 16px; }

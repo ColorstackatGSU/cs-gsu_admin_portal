@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import TechLeagueNav from '../components/TechLeagueNav';
 import Confirm from '../components/Confirm';
 import { ErrorNote, Field, Loading, OkNote } from '../components/Form';
-import { pixelateToUrl } from '../lib/pixelate';
 import { api } from '../lib/api';
 import { errorMessage } from '../lib/admin';
 import { formatDate } from '../lib/format';
-import { TECH_LEAGUE_SITE, techLeagueEmailError, type Access, type ChangeResult } from '../lib/access';
+import { techLeagueEmailError, type Access, type ChangeResult } from '../lib/access';
 
 /**
  * The Tech League's corner of this portal.
@@ -120,6 +119,8 @@ export default function TechLeague() {
             can open its admin tools.
           </p>
         </header>
+
+        <TechLeagueNav />
 
         <ErrorNote message={error} />
         <OkNote message={saved} />
@@ -258,34 +259,6 @@ export default function TechLeague() {
           )}
         </section>
 
-        <section className="card">
-          <div className="card-head">
-            <div>
-              <h2 className="card-title">Run the season</h2>
-              <p className="page-sub" style={{ marginTop: 4 }}>
-                Application review, decisions and score entry, moved here from the Tech
-                League's own admin page. Same work, same shortcuts, one sign-in.
-              </p>
-            </div>
-          </div>
-          <div className="card-pad" style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-            <Link to="/tech-league/review" className="btn btn-primary">Review applications</Link>
-            <Link to="/tech-league/pool" className="btn btn-secondary">Applicant pool</Link>
-            <Link to="/tech-league/scores" className="btn btn-secondary">Scores</Link>
-            {/* The Tech League's own admin page is still live and still works. Kept as a
-                way out until the port has been through a real review cycle and the page
-                over there is deleted. */}
-            <button
-              type="button"
-              className="btn btn-ghost"
-              onClick={() =>
-                pixelateToUrl(`${TECH_LEAGUE_SITE}/admin`, 'Opening the Tech League')
-              }
-            >
-              Open the old page →
-            </button>
-          </div>
-        </section>
     </div>
   );
 }
