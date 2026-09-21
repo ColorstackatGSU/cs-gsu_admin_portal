@@ -1817,15 +1817,17 @@ select.input:focus {
 .tl-scope .shell-app,
 .tl-scope .shell-auth {
   background-color: var(--canvas);
+  /* Bloom only. The pitch grid went with the dot field it replaced: at portal
+     density there is already a lot of ruled structure on screen, tables and
+     card edges and a bordered sidebar, and a second set of lines behind all of
+     it read as interference rather than as depth. */
   background-image:
     radial-gradient(ellipse 80% 55% at 50% -10%, rgba(77, 124, 254, 0.16), transparent 70%),
     radial-gradient(ellipse 60% 45% at 8% 20%, rgba(61, 240, 127, 0.08), transparent 70%),
-    radial-gradient(ellipse 55% 45% at 95% 72%, rgba(169, 112, 255, 0.10), transparent 70%),
-    linear-gradient(rgba(122, 143, 184, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(122, 143, 184, 0.045) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 100% 100%, 64px 64px, 64px 64px;
-  background-position: 0 0, 0 0, 0 0, -1px -1px, -1px -1px;
-  background-attachment: fixed, fixed, fixed, fixed, fixed;
+    radial-gradient(ellipse 55% 45% at 95% 72%, rgba(169, 112, 255, 0.10), transparent 70%);
+  background-size: 100% 100%;
+  background-position: 0 0;
+  background-attachment: fixed;
 }
 
 /* ---- Corners ---------------------------------------------------------------
@@ -1933,6 +1935,88 @@ select.input:focus {
   color: var(--brand);
 }
 .tl-scope .btn:hover:not(:disabled) {
+  box-shadow: var(--shadow-sm);
+}
+
+/* ---- Where ink and paper invert badly --------------------------------------
+   A handful of rules in this stylesheet paint a solid ink block with paper
+   text: the table header, and the go arrow on a hovered row. On paper that is a
+   near-black bar with white type, which is the strongest piece of structure the
+   portal draws. Inside the scope the tokens swap, so it came out as a white bar
+   with dark type sitting in the middle of the pitch. A whole light-theme
+   component that survived the crossing by being made of the two tokens most
+   likely to flip.
+
+   These are not restyled here, only inverted back to reading dark: the header
+   is still the heaviest row of the table, it just carries its weight the way
+   everything else in the scope does. */
+.tl-scope .table th {
+  background: var(--surface-subtle);
+  color: var(--ink-muted);
+  border-bottom: 1px solid var(--line);
+}
+.tl-scope .table tbody tr.row-link:hover .row-go,
+.tl-scope .table tbody tr.row-link:focus-within .row-go {
+  background: var(--brand-soft);
+  color: var(--brand);
+  border-color: var(--brand);
+}
+
+/* ---- The flyer's display treatment ------------------------------------------
+   The Tech League sets its big type in white with a hard green shadow offset
+   down-right, straight off the season flyer, plus a darker second offset under
+   it for the edge. text-shadow rather than a duplicated span, so the heading is
+   still one selectable string and one thing to a screen reader.
+
+   Offsets are in em so they track the heading rather than being sized for one
+   breakpoint: h1 here is a clamp, and a px shadow would drift off it on a
+   phone.
+
+   Only h1. Applying it to every heading would turn a signature into wallpaper,
+   and the card titles on the dense screens carry a green rule instead. */
+.tl-scope h1 {
+  color: var(--ink);
+  text-shadow:
+    0.055em 0.055em 0 var(--gsu-blue-dim),
+    0.09em 0.09em 0 rgba(0, 0, 0, 0.5);
+}
+
+/* The Tech League's short neon rule, which it sets above section headings. One
+   per card, so it marks a section rather than decorating every line. */
+.tl-scope .card-title::before {
+  content: '';
+  display: block;
+  width: 44px;
+  height: 3px;
+  margin-bottom: 10px;
+  background: var(--brand);
+  box-shadow: 0 0 12px rgba(61, 240, 127, 0.45);
+}
+
+/* ---- Hard ink shadows ------------------------------------------------------
+   Seven rules do not read --shadow-sm, they write the offset out by hand as
+   `2px 2px 0 var(--ink)`. Redefining the shadow tokens for the scope therefore
+   missed every one of them, and since --ink is near-white here each became a
+   solid white block sitting down-right of a pill or a small button. That was
+   the light ring around the section nav, the eyebrow and every status chip.
+
+   The list is exact, extracted from the rules that name var(--ink) in a
+   box-shadow. Buttons keep depth, since they are pressable and should look it.
+   Labels lose it: a chip riding on a hard offset is a sticker on paper, and the
+   hairline plus the fill already separate it from the pitch.
+
+   The two :hover rules are here rather than with the press rules above because
+   they are the same bug, not the same intent. */
+.tl-scope .btn-sm,
+.tl-scope .logo-row input[type='file']::file-selector-button {
+  box-shadow: var(--shadow-sm);
+}
+.tl-scope .eyebrow,
+.tl-scope .pill {
+  box-shadow: none;
+}
+.tl-scope .side-link.active:hover,
+.tl-scope .side-burger:hover {
   box-shadow: var(--shadow-sm);
 }
 
