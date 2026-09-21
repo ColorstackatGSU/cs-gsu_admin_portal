@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import { errorMessage, type Invoice, type InvoiceStatus } from '../lib/admin';
 import { displayStatus, formatDate, formatMoney, statusLabel } from '../lib/format';
 import StatusPill from '../components/StatusPill';
-import { Empty, ErrorNote, Loading } from '../components/Form';
+import { Empty, ErrorNote, Loading, OkNote } from '../components/Form';
 
 /**
  * Every invoice, newest first.
@@ -36,6 +36,11 @@ type Loaded = { key: string; rows: Invoice[]; error: string | null };
 
 export default function Invoices() {
   const nav = useNavigate();
+  // Set by InvoiceDetail when it deletes a draft and sends us here. The row it was
+  // showing is gone, so the confirmation has to land on this page or the officer
+  // is returned to the list with no sign that anything happened.
+  const { state } = useLocation() as { state: { deleted?: string } | null };
+  const deleted = state?.deleted ?? null;
   const [search, setSearch] = useSearchParams();
   const status = search.get('status') ?? '';
 
@@ -105,6 +110,7 @@ export default function Invoices() {
         </div>
       </header>
 
+      {deleted && <OkNote message={`Deleted the draft "${deleted}".`} />}
       <ErrorNote message={error} />
 
       {!loading && !status && outstanding > 0 && (

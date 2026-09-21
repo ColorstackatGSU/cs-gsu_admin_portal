@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import { errorMessage, type Invoice } from '../lib/admin';
 import Confirm from '../components/Confirm';
@@ -35,9 +35,16 @@ import { ErrorNote, OkNote } from '../components/Form';
  *     what happens next, which is most of what someone opening an invoice
  *     wants to know.
  *
- * There is deliberately no edit form: the admin API exposes create, issue and
- * void, and nothing else. Getting the amount or the tier wrong means voiding
- * and raising a new one, which is also the honest accounting answer.
+ * There is deliberately no edit form: the admin API exposes create, issue, void
+ * and delete, and nothing else. Getting the amount or the tier wrong on an
+ * invoice a sponsor has already seen means voiding and raising a new one, which
+ * is also the honest accounting answer.
+ *
+ * Delete is the exception, and only on a draft. A draft carries no Zeffy link
+ * and no issue date, so an invoice raised against the wrong sponsor and caught
+ * before it went out was never a financial event. Voiding it would leave a row
+ * that reads like a cancelled deal forever, and the next officer would have no
+ * way to tell a real cancellation from somebody's typo.
  */
 export default function InvoiceDetail() {
   const { id } = useParams<{ id: string }>();
@@ -45,9 +52,12 @@ export default function InvoiceDetail() {
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
-  const [busy, setBusy] = useState<'issue' | 'void' | null>(null);
+  const [busy, setBusy] = useState<'issue' | 'void' | 'delete' | null>(null);
   /** Voiding cannot be undone, so it is confirmed under the buttons first. */
   const [confirmingVoid, setConfirmingVoid] = useState(false);
+  /** Deleting cannot be undone either, and unlike voiding it leaves no trace. */
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const nav = useNavigate();
 
   useEffect(() => {
     api
@@ -91,6 +101,31 @@ export default function InvoiceDetail() {
     } catch (e) {
       setError(errorMessage(e));
     } finally {
+      setBusy(null);
+    }
+  }
+
+  /**
+   * Removes a draft outright.
+   *
+   * Offered only on a draft, because that is the only status the API will delete.
+   * A draft has no Zeffy link, no issue date and has been seen by nobody outside
+   * the chapter, so an invoice raised by mistake is not an accounting event worth
+   * keeping a voided row for. Anything past draft still has to be voided.
+   */
+  async function deleteInvoice() {
+    if (busy || !invoice) return;
+    setConfirmingDelete(false);
+    setError(null);
+    setDone(null);
+    setBusy('delete');
+    try {
+      await api.delete(`/admin/invoices/${id}`);
+      // Straight back to the list. Staying would leave the page showing an invoice
+      // that no longer exists, and any further action on it would 404.
+      nav('/invoices', { replace: true, state: { deleted: invoice.title } });
+    } catch (e) {
+      setError(errorMessage(e));
       setBusy(null);
     }
   }
@@ -185,6 +220,19 @@ export default function InvoiceDetail() {
               {busy === 'void' ? 'Voiding…' : 'Void invoice'}
             </button>
           )}
+          {/* Drafts only, and set as the quietest button on the row: voiding is
+              the right answer for almost every invoice, and this one is here for
+              the narrow case of a row that should never have been created. */}
+          {invoice.status === 'draft' && (
+            <button
+              type="button"
+              className="btn btn-ghost"
+              onClick={() => setConfirmingDelete(true)}
+              disabled={busy !== null || confirmingDelete}
+            >
+              {busy === 'delete' ? 'Deleting…' : 'Delete draft'}
+            </button>
+          )}
         </div>
       </header>
 
@@ -195,7 +243,7 @@ export default function InvoiceDetail() {
           points={
             invoice.status === 'paid' || invoice.status === 'processing'
               ? [
-                  `This invoice is marked ${invoice.status}. Voiding it refunds nothing — it only stops us counting it.`,
+                  `This invoice is marked ${invoice.status}. Voiding it refunds nothing, it only stops us counting it.`,
                   'It cannot be un-voided.',
                 ]
               : [
@@ -209,6 +257,24 @@ export default function InvoiceDetail() {
           danger
           onConfirm={() => void voidInvoice()}
           onCancel={() => setConfirmingVoid(false)}
+        />
+      )}
+
+      {confirmingDelete && (
+        <Confirm
+          style={{ marginBottom: 22 }}
+          question={`Delete ${invoice.title}?`}
+          points={[
+            'It is removed completely. Voiding keeps the row and marks it cancelled, deleting leaves nothing behind.',
+            'Only drafts can be deleted, so nobody outside the chapter has seen this one.',
+            'It cannot be undone.',
+          ]}
+          confirmLabel="Delete it"
+          busyLabel="Deleting…"
+          busy={busy === 'delete'}
+          danger
+          onConfirm={() => void deleteInvoice()}
+          onCancel={() => setConfirmingDelete(false)}
         />
       )}
 
