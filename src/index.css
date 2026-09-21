@@ -1478,3 +1478,277 @@ select.input:focus {
   text-transform: uppercase;
   letter-spacing: 0.005em;
 }
+
+/* ============================================================================
+   TECH LEAGUE WORKSPACE  (added with /tech-league/review, /pool and /scores)
+   ============================================================================
+   New block, appended on purpose so nothing above it moved. Every colour here
+   is a token, so these rules come out cream in the portal and neon on the pitch
+   without a second set of rules: only .tl-scope redefines the tokens.
+
+   The review queue is the reason most of this exists. It is a two-column
+   working screen, which the portal did not have before: every other page here
+   is a list you leave to act on a row, and this one is a list you act on
+   without leaving.
+   ==========================================================================*/
+
+/* The one gap in the Tech League's token set, found by putting a .note-info on
+   the applicant pool screen: .tl-scope redefines --ok, --warn and --bad but not
+   --info, so --info-bg kept resolving to the light theme's #D8E9FF and the note
+   came out near-white text on pale blue. Declared here as a new rule rather
+   than edited into the .tl-scope block above, which is not this port's to move.
+   Same three-token shape as the others: a readable tone, a pill fill, a wash. */
+.tl-scope {
+  --info: #7ea2ff;
+  --info-fill: #2f5bd0;
+  --info-bg: rgba(77, 124, 254, 0.16);
+}
+
+/* Screen-reader-only text. The portal had no such utility because nothing in it
+   needed a label the eye does not: the score table does, one per box. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Long values that have nowhere to break: an address, a team name somebody typed
+   without spaces, a major. Better an ugly break than a row wider than the phone. */
+.tl-wrap { overflow-wrap: anywhere; word-break: break-word; }
+
+/* ---- Section links and toolbars ------------------------------------------ */
+
+.tl-nav { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.tl-nav-link { text-decoration: none; }
+.tl-nav-count {
+  margin-left: 2px;
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 10.5px;
+}
+
+.tl-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.tl-chip-count {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 10.5px;
+  opacity: 0.8;
+}
+
+.tl-toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; }
+
+.tl-kbd {
+  display: inline-block;
+  min-width: 18px;
+  padding: 1px 5px;
+  border: var(--bw-thin) solid currentColor;
+  font-family: var(--mono);
+  font-size: 10px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* ---- Queue pills --------------------------------------------------------- */
+/* The label is always spelled out, so these survive greyscale exactly like the
+   invoice pills they sit next to in the same system. */
+
+.pill-tl-review     { background: var(--info-fill); }
+.pill-tl-accepted   { background: var(--ok-fill); }
+.pill-tl-waitlisted { background: var(--warn-fill); }
+.pill-tl-denied     { background: var(--surface-subtle); color: var(--ink-muted); }
+.pill-tl-denied::before { background: var(--ink-muted); }
+.pill-tl-draft      { background: var(--violet); }
+
+/* ---- Split: list beside the application ---------------------------------- */
+/* 340px is the width at which a name, a year and a major fit on two lines
+   without the status pill wrapping under them. Below 1000px the two columns
+   stack, because a 40ch application column is not a readable application. */
+
+.tl-split { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 16px; align-items: start; }
+
+@media (max-width: 1000px) {
+  .tl-split { grid-template-columns: minmax(0, 1fr); }
+}
+
+.tl-list-card { padding: 0; max-height: 72vh; overflow-y: auto; }
+.tl-pane { min-width: 0; }
+
+.tl-list { list-style: none; margin: 0; padding: 0; }
+.tl-item {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 13px;
+  text-align: left;
+  border-bottom: var(--bw-thin) solid var(--line-soft);
+  transition: var(--press);
+}
+.tl-list li:last-child .tl-item { border-bottom: none; }
+.tl-item:hover { background: var(--surface-hover); }
+.tl-item.is-selected { background: var(--brand-soft); box-shadow: inset 4px 0 0 var(--brand); }
+
+.tl-item-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.tl-item-name { font-size: 14.5px; font-weight: 700; overflow-wrap: anywhere; }
+.tl-item-sub { font-size: 11.5px; font-weight: 500; color: var(--ink-muted); overflow-wrap: anywhere; }
+.tl-item-side { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
+.tl-item-flags { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; font-size: 10.5px; font-weight: 700; }
+.tl-flag-warn { color: var(--warn); }
+
+/* ---- One application ------------------------------------------------------ */
+
+.tl-detail { padding: 20px; }
+.tl-detail-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.tl-detail-arrows { display: flex; gap: 6px; }
+.tl-detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.tl-decide {
+  padding: 14px;
+  margin-bottom: 20px;
+  border: var(--bw-thin) solid var(--line-strong);
+  background: var(--surface-subtle);
+}
+.tl-decide-buttons { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* The unsent-email row. A warning note that carries its own fix, because the
+   only useful thing to do about "we never told them" is to tell them. */
+.tl-unsent {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0 0;
+}
+.tl-unsent > span { flex: 1 1 220px; }
+
+.tl-block-title {
+  margin: 22px 0 10px;
+  padding-bottom: 6px;
+  border-bottom: var(--bw-thin) solid var(--line-soft);
+  font-size: 12px;
+  letter-spacing: 0.13em;
+  color: var(--ink-muted);
+}
+
+.tl-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 0; }
+.tl-facts .is-wide { grid-column: 1 / -1; }
+.tl-facts dt {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.tl-facts dd { margin: 3px 0 0; font-size: 14.5px; font-weight: 500; }
+
+.tl-resume { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font-weight: 700; }
+
+.tl-answer { margin-bottom: 14px; }
+.tl-answer h4 { margin-bottom: 5px; color: var(--ink-muted); }
+.tl-answer blockquote {
+  margin: 0;
+  padding: 9px 13px;
+  border-left: var(--bw) solid var(--line-strong);
+  background: var(--surface-subtle);
+  font-size: 14.5px;
+  font-weight: 500;
+  white-space: pre-wrap;
+}
+
+.tl-reopen { margin-top: 22px; padding-top: 14px; border-top: var(--bw-thin) solid var(--line-soft); }
+
+/* ---- Applicant pool ------------------------------------------------------- */
+
+.tl-breakdowns { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.tl-breakdown { padding: 18px; }
+
+.tl-bars { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+.tl-bars li { display: grid; grid-template-columns: minmax(0, 8.5em) 1fr auto; align-items: center; gap: 10px; }
+.tl-bars-label { font-size: 12.5px; font-weight: 600; }
+/* Scaled against the largest row, not the total: a field whose top answer is
+   14% still has to show a shape rather than six slivers. */
+.tl-bars-track { height: 13px; background: var(--surface-subtle); border: var(--bw-thin) solid var(--ink); }
+.tl-bars-fill { display: block; height: 100%; min-width: 2px; background: var(--brand); }
+.tl-bars-value { font-size: 12px; font-weight: 700; }
+
+/* On a phone the bar takes its own line under the label and the count. Placed
+   explicitly rather than left to auto-flow, which put the count on a third line
+   below the bar and made each breakdown half a screen taller than it needed. */
+@media (max-width: 520px) {
+  .tl-bars li { grid-template-columns: minmax(0, 1fr) auto; row-gap: 4px; }
+  .tl-bars-label { grid-column: 1; grid-row: 1; }
+  .tl-bars-value { grid-column: 2; grid-row: 1; }
+  .tl-bars-track { grid-column: 1 / -1; grid-row: 2; }
+}
+
+/* ---- Scores --------------------------------------------------------------- */
+
+.tl-staged { margin-bottom: 16px; }
+.tl-staged-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.tl-staged-bar > span:first-child { flex: 1 1 280px; }
+.tl-staged-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.tl-scores th, .tl-scores td { vertical-align: top; }
+.tl-scores th:last-child, .tl-scores td:last-child { text-align: left; }
+.tl-scores tbody th { text-align: left; font-weight: 700; }
+/* Inherits its cell's colour rather than taking --ink-muted. .table th inverts
+   ink and paper, so a muted-ink second line landed as grey on the inverted
+   header and was the hardest thing on the screen to read. */
+.tl-th-sub {
+  display: block;
+  margin-top: 3px;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: inherit;
+  opacity: 0.72;
+}
+
+.tl-cell-input { width: 84px; margin-bottom: 0; padding: 7px 9px; font-family: var(--mono); }
+.tl-cell.is-bad .tl-cell-input { border-color: var(--bad); }
+/* Block, so the reason wraps under the box it belongs to. As an inline span it
+   ran off along the row and pointed at the cell to its right. */
+.tl-cell .field-error { display: block; max-width: 15ch; }
+/* A staged cell is marked by its own edge, not by the cell background: the row
+   underneath it is a hover target and two backgrounds fighting reads as noise. */
+.tl-cell.is-pending .tl-cell-input { border-color: var(--warn); box-shadow: inset 0 0 0 1px var(--warn); }
+.tl-cell-was { display: block; margin-top: 4px; font-size: 10.5px; font-weight: 700; }
+
+.tl-scroll-hint { display: none; margin: 0 0 8px; }
+@media (max-width: 900px) {
+  .tl-scroll-hint { display: block; }
+}
+
+/* ---- Sidebar sub-group ---------------------------------------------------- */
+/* Indented and set a size down, so the three Tech League screens read as living
+   under it rather than as three more top-level places. */
+
+.side-sub {
+  margin-left: 16px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  font-size: 11px;
+}
+.side-sub svg { width: 16px; height: 16px; }

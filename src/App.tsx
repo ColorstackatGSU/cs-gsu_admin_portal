@@ -19,6 +19,9 @@ import BotHealth from './pages/BotHealth';
 import SponsorView from './pages/SponsorView';
 import Access from './pages/Access';
 import TechLeague from './pages/TechLeague';
+import TechLeagueReview from './pages/TechLeagueReview';
+import TechLeaguePool from './pages/TechLeaguePool';
+import TechLeagueScores from './pages/TechLeagueScores';
 import NotFound from './pages/NotFound';
 
 /**
@@ -69,6 +72,14 @@ export default function App() {
             play a pixel dissolve, because the two schemes are far enough apart that
             an instant swap reads as a broken stylesheet. */}
         <Route path="tech-league" element={<ProtectedRoute><TechLeague /></ProtectedRoute>} />
+
+        {/* The Tech League's own admin workspace, moved in here: the queue an officer
+            works through in September, the season's totals, and the score table. Three
+            routes rather than three tabs on one, because each is a place somebody links
+            another officer to. */}
+        <Route path="tech-league/review" element={<ProtectedRoute><TechLeagueReview /></ProtectedRoute>} />
+        <Route path="tech-league/pool" element={<ProtectedRoute><TechLeaguePool /></ProtectedRoute>} />
+        <Route path="tech-league/scores" element={<ProtectedRoute><TechLeagueScores /></ProtectedRoute>} />
 
         <Route path="*" element={<NotFound />} />
       </Route>

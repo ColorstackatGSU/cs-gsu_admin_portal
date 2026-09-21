@@ -33,7 +33,16 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+/**
+ * Everything up to a successful Response: bearer, JSON header, the fetch, and
+ * turning a non-2xx into an ApiError.
+ *
+ * Split out from request() because not every admin endpoint answers with JSON.
+ * The Tech League's resume route is a PDF passthrough, and the first version of
+ * that button called request(), which read the bytes as text and handed them to
+ * JSON.parse. The officer got "Unexpected token %" instead of a resume.
+ */
+async function send(path: string, init: RequestInit = {}): Promise<Response> {
   // Grab the token fresh each call rather than caching. Supabase auto-refreshes
   // the session on a timer, and reading from the client is O(1). Caching a token
   // means we hold a stale one across a refresh.
@@ -70,6 +79,12 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     }
     throw new ApiError(res.status, body, `${res.status} ${res.statusText}`);
   }
+
+  return res;
+}
+
+async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const res = await send(path, init);
 
   // Some admin endpoints return no body at all on success. Spring's void
   // handlers (POST /admin/unmatched-payments/{id}/dismiss) answer 200 with
@@ -113,6 +128,17 @@ export const api = {
   get: <T>(path: string) => request<T>(path, { method: 'GET' }),
   post: <T>(path: string, body?: unknown) =>
     request<T>(path, { method: 'POST', body: body == null ? undefined : JSON.stringify(body) }),
+  put: <T>(path: string, body?: unknown) =>
+    request<T>(path, { method: 'PUT', body: body == null ? undefined : JSON.stringify(body) }),
+  /**
+   * A response that is a file rather than JSON, already authenticated.
+   *
+   * A plain <a href> cannot be used for these: the bearer lives in memory, not
+   * in a cookie, so the browser's own request arrives unauthenticated and Spring
+   * answers 401. The caller gets the bytes and decides whether to open them in a
+   * tab or hand them to a download.
+   */
+  blob: async (path: string): Promise<Blob> => (await send(path, { method: 'GET' })).blob(),
   patch: <T>(path: string, body?: unknown) =>
     request<T>(path, { method: 'PATCH', body: body == null ? undefined : JSON.stringify(body) }),
   delete: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
