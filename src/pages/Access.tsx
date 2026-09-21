@@ -264,7 +264,7 @@ function ChapterSection({
             question={`Remove ${removing} from the admin portal?`}
             points={[
               'They lose access to sponsors, invoices, members and Discord immediately.',
-              'We email them to say so, and tell the other officers.',
+              'We email them to say so. No other officer is emailed.',
               'Their account still works, it just stops opening the admin screens.',
               'You can add them back at any time.',
             ]}

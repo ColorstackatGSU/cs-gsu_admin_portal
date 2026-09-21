@@ -244,7 +244,7 @@ export default function TechLeague() {
                 points={[
                   'They lose application review, decisions and score entry immediately.',
                   'Their Tech League account and their own application are untouched.',
-                  'We email them, and tell the other officers.',
+                  'We email them. No other officer is emailed.',
                   'The Tech League refuses this if they are the last admin left.',
                 ]}
                 confirmLabel="Remove access"
