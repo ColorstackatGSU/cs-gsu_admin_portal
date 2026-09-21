@@ -4,6 +4,7 @@ import Confirm from '../components/Confirm';
 import TechLeagueNav from '../components/TechLeagueNav';
 import { ErrorNote, Empty, Loading, OkNote } from '../components/Form';
 import { api } from '../lib/api';
+import { claim } from '../lib/prefetch';
 import { errorMessage } from '../lib/admin';
 import { formatDate } from '../lib/format';
 import {
@@ -61,8 +62,7 @@ export default function TechLeagueReview() {
 
   useEffect(() => {
     let cancelled = false;
-    api
-      .get<Application[]>('/admin/tech-league/applications')
+    claim<Application[]>('/admin/tech-league/applications')
       .then((rows) => {
         if (!cancelled) setItems(rows);
       })

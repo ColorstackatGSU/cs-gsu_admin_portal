@@ -6,6 +6,7 @@ import { useBotQueueCount } from '../hooks/useBotQueueCount';
 import { ORG } from '../data/org';
 import { isTechLeaguePath } from '../lib/access';
 import { pixelateThen } from '../lib/pixelate';
+import { warmRoute } from '../lib/prefetch';
 import { guardNavigation } from '../lib/unsaved';
 
 /**
@@ -139,6 +140,13 @@ export default function Sidebar() {
                   // unsaved work gets asked about first. The link's own navigation
                   // has to be cancelled either way: it would race the question.
                   e.preventDefault();
+
+                  // Start the destination's request now rather than when it mounts.
+                  // What follows is up to 620ms of dissolve, and previously none of
+                  // it was spent fetching. Fired before the unsaved-work guard on
+                  // purpose: if a question appears, the request runs while it is
+                  // being read, and a GET nobody ends up needing is thrown away.
+                  warmRoute(to);
 
                   // A click that crosses between the portal's scheme and the Tech
                   // League's gets the pixel dissolve, in whichever direction it

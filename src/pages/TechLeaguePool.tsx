@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import TechLeagueNav from '../components/TechLeagueNav';
 import { Empty, ErrorNote, Loading } from '../components/Form';
-import { api } from '../lib/api';
+import { claim } from '../lib/prefetch';
 import { errorMessage } from '../lib/admin';
 import {
   COMMITMENT_LABELS,
@@ -41,8 +41,7 @@ export default function TechLeaguePool() {
 
   useEffect(() => {
     let cancelled = false;
-    api
-      .get<Application[]>('/admin/tech-league/applications')
+    claim<Application[]>('/admin/tech-league/applications')
       .then((rows) => {
         if (!cancelled) setItems(rows);
       })

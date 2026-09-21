@@ -4,6 +4,7 @@ import Confirm from '../components/Confirm';
 import TechLeagueNav from '../components/TechLeagueNav';
 import { Empty, ErrorNote, Loading, OkNote } from '../components/Form';
 import { api } from '../lib/api';
+import { claim } from '../lib/prefetch';
 import { errorMessage } from '../lib/admin';
 import {
   currentUnsaved,
@@ -50,8 +51,7 @@ export default function TechLeagueScores() {
 
   useEffect(() => {
     let cancelled = false;
-    api
-      .get<Scores>('/admin/tech-league/scores')
+    claim<Scores>('/admin/tech-league/scores')
       .then((rows) => {
         if (!cancelled) setData(rows);
       })

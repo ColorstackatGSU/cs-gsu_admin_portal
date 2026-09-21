@@ -3,6 +3,7 @@ import TechLeagueNav from '../components/TechLeagueNav';
 import Confirm from '../components/Confirm';
 import { ErrorNote, Field, Loading, OkNote } from '../components/Form';
 import { api } from '../lib/api';
+import { claim } from '../lib/prefetch';
 import { errorMessage } from '../lib/admin';
 import { formatDate } from '../lib/format';
 import { techLeagueEmailError, type Access, type ChangeResult } from '../lib/access';
@@ -33,7 +34,7 @@ export default function TechLeague() {
   const [removing, setRemoving] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    setData(await api.get<Access>('/admin/access'));
+    setData(await claim<Access>('/admin/access'));
   }, []);
 
   useEffect(() => {

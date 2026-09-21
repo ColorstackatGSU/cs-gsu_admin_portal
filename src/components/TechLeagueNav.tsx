@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { guardNavigation } from '../lib/unsaved';
+import { warmRoute } from '../lib/prefetch';
 
 /**
  * Moving between the Tech League's four screens without going back to the sidebar.
@@ -37,6 +38,11 @@ export default function TechLeagueNav({ count }: { count?: number | null }) {
             // Scores stages its edits and writes nothing until they are confirmed, and
             // these four are separate routes, so leaving one unmounts what it is holding.
             e.preventDefault();
+
+            // No dissolve between these four, so this buys little on its own. It
+            // pays when Scores is holding staged edits: the request runs while the
+            // officer reads the question about losing them.
+            warmRoute(to);
             guardNavigation(() => nav(to));
           }}
         >
