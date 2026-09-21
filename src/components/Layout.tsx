@@ -2,6 +2,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import Sidebar from './Sidebar';
 import PixelTransition from './PixelTransition';
+import { isTechLeaguePath } from '../lib/access';
 import Footer from './Footer';
 
 /**
@@ -27,6 +28,20 @@ export default function Layout() {
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [pathname]);
+
+  /**
+   * The Tech League's scheme is applied to <body>, not to the app shell.
+   *
+   * It has to be an ancestor of everything for the whole chrome to change, and body is
+   * also where the page's own background colour is set, so redefining --canvas here is
+   * what stops a band of cream showing below short content. A class on the shell left the
+   * sidebar themed and the page under it cream.
+   */
+  useEffect(() => {
+    const scoped = isTechLeaguePath(pathname);
+    document.body.classList.toggle('tl-scope', scoped);
+    return () => document.body.classList.remove('tl-scope');
   }, [pathname]);
 
   if (isAuth) {

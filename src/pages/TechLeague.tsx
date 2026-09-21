@@ -93,20 +93,16 @@ export default function TechLeague() {
 
   if (error && !data) {
     return (
-      <div className="tl-scope">
-        <div className="wrap">
-          <ErrorNote message={error} />
-        </div>
+      <div className="wrap">
+        <ErrorNote message={error} />
       </div>
     );
   }
 
   if (!data) {
     return (
-      <div className="tl-scope">
-        <div className="wrap">
-          <Loading what="the Tech League" />
-        </div>
+      <div className="wrap">
+        <Loading what="the Tech League" />
       </div>
     );
   }
@@ -114,8 +110,7 @@ export default function TechLeague() {
   const { techLeagueAdmins: admins, techLeagueConfigured: configured, techLeagueProblem: outage } = data;
 
   return (
-    <div className="tl-scope">
-      <div className="wrap">
+    <div className="wrap">
         <header className="page-head">
           <span className="eyebrow eyebrow-mint">ColorStack @ GSU</span>
           <h1>Tech League</h1>
@@ -284,7 +279,6 @@ export default function TechLeague() {
             </button>
           </div>
         </section>
-      </div>
     </div>
   );
 }

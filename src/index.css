@@ -1443,11 +1443,19 @@ select.input:focus {
   --warn: #ffc24d; --warn-fill: #b8791f; --warn-bg: rgba(255, 194, 77, 0.14);
   --bad: #ff6b5e;  --bad-fill: #b03a30;  --bad-bg: rgba(255, 107, 94, 0.14);
 
-  background: var(--canvas);
   color: var(--ink);
-  /* The scope paints its own background, so it has to own the full column or
-     the cream shell shows through under short content. */
-  min-height: 100%;
+}
+
+/* .shell-app paints a cream ground with near-black dots. Inside the scope the
+   ground is the pitch, so the dots have to invert or they disappear into it.
+   The whole shorthand is redeclared rather than just the colour, so the light
+   theme can be retuned without this drifting out of step with it. */
+.tl-scope .shell-app,
+.tl-scope .shell-auth {
+  background-color: var(--canvas);
+  background-image: radial-gradient(rgba(122, 143, 184, 0.16) 1.5px, transparent 1.5px);
+  background-size: 22px 22px;
+  background-position: -1px -1px;
 }
 
 /* The portal's shadows are hard ink offsets on paper. On the pitch an ink
