@@ -95,3 +95,23 @@ export function techLeagueEmailError(value: string): string | null {
   }
   return null;
 }
+
+/**
+ * The Tech League's public site. Used for the link out to the parts of its admin that
+ * have not been ported into this portal yet.
+ *
+ * Hardcoded rather than read from the API because it is a public address, not a secret,
+ * and a page that cannot render its own link because a config call failed is worse than
+ * one that occasionally points at the wrong environment.
+ */
+export const TECH_LEAGUE_SITE = 'https://techleague.colorstackatgsu.com';
+
+/**
+ * Whether a path is inside the Tech League's design scope.
+ *
+ * The sidebar uses this to decide whether a click crosses between the two schemes, which
+ * is what the pixel dissolve marks. Crossing is the interesting event, not the destination.
+ */
+export function isTechLeaguePath(path: string): boolean {
+  return path === '/tech-league' || path.startsWith('/tech-league/');
+}

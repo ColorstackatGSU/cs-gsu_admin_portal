@@ -8,11 +8,9 @@ import {
   REALM_LABEL,
   emailError,
   grantBody,
-  techLeagueEmailError,
   type Access as AccessData,
   type ChangeResult,
   type ChapterAdmin,
-  type TechLeagueAdmin,
 } from '../lib/access';
 
 /**
@@ -89,9 +87,9 @@ export default function Access() {
         <span className="eyebrow eyebrow-coral">Access</span>
         <h1>Who can get in</h1>
         <p className="page-sub">
-          Officers who can sign in to this portal, and students who can open the Tech
-          League's admin page. Everything here is recorded, and everyone else with access is
-          emailed when it changes.
+          Officers who can sign in to this portal. Tech League admins are managed on the
+          Tech League page; both show up in the history below. Everything here is recorded,
+          and everyone else with access is emailed when it changes.
         </p>
       </header>
 
@@ -100,14 +98,6 @@ export default function Access() {
 
       <ChapterSection
         admins={data.chapterAdmins}
-        onChanged={afterChange}
-        onError={setError}
-      />
-
-      <TechLeagueSection
-        admins={data.techLeagueAdmins}
-        configured={data.techLeagueConfigured}
-        problem={data.techLeagueProblem}
         onChanged={afterChange}
         onError={setError}
       />
@@ -284,203 +274,6 @@ function ChapterSection({
             busyLabel="Removing…"
             problem={problem}
             onConfirm={() => void remove(removing)}
-            onCancel={() => {
-              setRemoving(null);
-              setProblem(null);
-            }}
-          />
-        </div>
-      )}
-    </section>
-  );
-}
-
-/* ---------- Tech League admins ---------- */
-
-function TechLeagueSection({
-  admins,
-  configured,
-  problem: outage,
-  onChanged,
-  onError,
-}: {
-  admins: TechLeagueAdmin[];
-  configured: boolean;
-  problem: string | null;
-  onChanged: (r: ChangeResult, done: string) => Promise<void>;
-  onError: (m: string | null) => void;
-}) {
-  const [adding, setAdding] = useState(false);
-  const [email, setEmail] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [problem, setProblem] = useState<string | null>(null);
-  const [removing, setRemoving] = useState<string | null>(null);
-
-  const emailProblem = techLeagueEmailError(email);
-  const canSubmit = Boolean(email.trim()) && !emailProblem && !busy;
-
-  async function set(target: string, grant: boolean) {
-    setBusy(true);
-    setProblem(null);
-    onError(null);
-    try {
-      const result = await api.post<ChangeResult>('/admin/access/tech-league', {
-        email: target.trim().toLowerCase(),
-        grant,
-      });
-      await onChanged(
-        result,
-        grant
-          ? `${target.trim().toLowerCase()} can now open the Tech League admin page.`
-          : `${target} can no longer open the Tech League admin page.`,
-      );
-      if (grant) {
-        setEmail('');
-        setAdding(false);
-      } else {
-        setRemoving(null);
-      }
-    } catch (err) {
-      setProblem(errorMessage(err));
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <section className="card" style={{ marginBottom: 16 }}>
-      <div className="card-head">
-        <div>
-          <h2 className="card-title">Tech League</h2>
-          <p className="page-sub" style={{ marginTop: 4 }}>
-            Application review, decisions and score entry at techleague.colorstackatgsu.com.
-          </p>
-        </div>
-        {configured && !outage && (
-          <button
-            type="button"
-            className={adding ? 'btn btn-secondary btn-sm' : 'btn btn-primary btn-sm'}
-            onClick={() => {
-              setAdding((v) => !v);
-              setProblem(null);
-            }}
-            aria-expanded={adding}
-            aria-controls="add-tl-admin"
-          >
-            {adding ? 'Cancel' : '+ Add admin'}
-          </button>
-        )}
-      </div>
-
-      {!configured && (
-        <div className="card-pad">
-          <div className="note note-info">
-            The Tech League connection is not set up, so this half is read only. Set
-            <code> TECH_LEAGUE_API_URL </code> and <code> TECH_LEAGUE_SERVICE_TOKEN </code>
-            on the API, matching <code> ADMIN_PORTAL_TOKEN </code> on the Tech League.
-          </div>
-        </div>
-      )}
-
-      {configured && outage && (
-        <div className="card-pad">
-          <div className="note note-warn">
-            Could not reach the Tech League just now, so its admins are not listed. Officers
-            above are unaffected. {outage}
-          </div>
-        </div>
-      )}
-
-      {adding && (
-        <form
-          id="add-tl-admin"
-          className="card-pad"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (canSubmit) void set(email, true);
-          }}
-          noValidate
-        >
-          <div className="form-grid">
-            <Field
-              label="Student email"
-              value={email}
-              onChange={setEmail}
-              type="email"
-              required
-              wide
-              error={emailProblem}
-              hint="They need a Tech League account already. Nobody can be made an admin before they sign up there."
-              autoComplete="off"
-            />
-          </div>
-          {problem && <p className="field-error">{problem}</p>}
-          <button type="submit" className="btn btn-primary" disabled={!canSubmit}>
-            {busy ? 'Adding…' : 'Make admin'}
-          </button>
-        </form>
-      )}
-
-      {configured && !outage && admins.length === 0 && (
-        <div className="card-pad">
-          <p className="muted">No Tech League admins yet.</p>
-        </div>
-      )}
-
-      {admins.length > 0 && (
-        <div className="card" style={{ padding: 0, border: 0, boxShadow: 'none' }}>
-          <table className="table">
-            <thead>
-              <tr>
-                <th scope="col">Email</th>
-                <th scope="col">Name</th>
-                <th scope="col">Since</th>
-                <th scope="col">Added by</th>
-                <th scope="col" />
-              </tr>
-            </thead>
-            <tbody>
-              {admins.map((a) => (
-                <tr key={a.email}>
-                  <td>{a.email}</td>
-                  <td className="muted">{a.fullName ?? '—'}</td>
-                  <td className="muted faint">{a.grantedAt ? formatDate(a.grantedAt) : '—'}</td>
-                  <td className="muted faint">{a.grantedBy ?? '—'}</td>
-                  <td style={{ textAlign: 'right' }}>
-                    <button
-                      type="button"
-                      className="btn btn-ghost btn-sm"
-                      onClick={() => {
-                        setRemoving(a.email);
-                        setProblem(null);
-                      }}
-                    >
-                      Remove
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {removing && (
-        <div className="card-pad">
-          <Confirm
-            question={`Remove ${removing} from the Tech League admin page?`}
-            points={[
-              'They lose application review, decisions and score entry immediately.',
-              'Their Tech League account and their own application are untouched.',
-              'We email them, and tell the other officers.',
-              'The Tech League refuses this if they are the last admin left.',
-            ]}
-            confirmLabel="Remove access"
-            danger
-            busy={busy}
-            busyLabel="Removing…"
-            problem={problem}
-            onConfirm={() => void set(removing, false)}
             onCancel={() => {
               setRemoving(null);
               setProblem(null);

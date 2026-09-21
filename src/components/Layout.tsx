@@ -1,6 +1,7 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import Sidebar from './Sidebar';
+import PixelTransition from './PixelTransition';
 import Footer from './Footer';
 
 /**
@@ -86,6 +87,9 @@ export default function Layout() {
       <main className="side-main">
         <Outlet />
       </main>
+      {/* Mounted once, here, rather than per page: it has to outlive the route change it
+          is covering, and a page that unmounts mid-navigation cannot do that. */}
+      <PixelTransition />
     </div>
   );
 }

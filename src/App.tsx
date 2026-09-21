@@ -18,6 +18,7 @@ import BotLinks from './pages/BotLinks';
 import BotHealth from './pages/BotHealth';
 import SponsorView from './pages/SponsorView';
 import Access from './pages/Access';
+import TechLeague from './pages/TechLeague';
 import NotFound from './pages/NotFound';
 
 /**
@@ -63,6 +64,11 @@ export default function App() {
         {/* Who can sign in here, and who can sign in to the Tech League's admin page.
             Kept last because it is the screen that hands out the other screens. */}
         <Route path="access" element={<ProtectedRoute><Access /></ProtectedRoute>} />
+
+        {/* Rendered in the Tech League's own scheme. Getting here and leaving both
+            play a pixel dissolve, because the two schemes are far enough apart that
+            an instant swap reads as a broken stylesheet. */}
+        <Route path="tech-league" element={<ProtectedRoute><TechLeague /></ProtectedRoute>} />
 
         <Route path="*" element={<NotFound />} />
       </Route>

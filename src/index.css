@@ -1280,3 +1280,193 @@ select.input:focus {
   letter-spacing: 0.04em;
   color: var(--ink-faint);
 }
+
+/* ============================================================
+   Pixel dissolve  (components/PixelTransition.tsx)
+
+   Crossing from this portal into the Tech League means crossing between two
+   design systems, cream and GSU blue into a near-black pitch with neon green.
+   The squares below ramp from one palette to the other as they sweep, so the
+   colour change happens during the move rather than as a jolt on arrival.
+
+   Only transform and opacity animate, on a fixed layer, so several hundred
+   cells composite on the GPU without touching layout underneath.
+   ============================================================ */
+
+.pixelfx {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: grid;
+  /* The overlay is decoration over a navigation that is already happening, so
+     it must never be the thing that swallows a click. */
+  pointer-events: none;
+}
+
+.pixelfx-cell {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: scale(0);
+  will-change: transform;
+  /* forwards, so a cell that has arrived stays put until the phase flips.
+     Without it every square would snap back to scale(0) at the end of its own
+     animation and the cover would never actually hold. */
+  animation-fill-mode: forwards;
+  animation-duration: 240ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pixelfx-covering .pixelfx-cell {
+  animation-name: pixelfx-in;
+}
+
+/* Shorter on the way out than on the way in, because the reveal has less time to
+   spend: the stagger and this duration together have to fit inside REVEAL_MS or the
+   overlay unmounts on top of squares that are still shrinking. */
+.pixelfx-revealing .pixelfx-cell {
+  transform: scale(1);
+  animation-name: pixelfx-out;
+  animation-duration: 200ms;
+}
+
+@keyframes pixelfx-in {
+  from { transform: scale(0); }
+  /* Past full size, so every square overlaps its neighbours. Squares that land
+     at exactly 1 leave hairline seams where the grid rounds to fractional
+     pixels. 1.02 was not enough of a margin: on a phone the cells are small
+     enough that two per cent is a third of a pixel, and rows of hairlines were
+     still showing through. */
+  to   { transform: scale(1.06); }
+}
+
+@keyframes pixelfx-out {
+  from { transform: scale(1.06); }
+  to   { transform: scale(0); }
+}
+
+/* Sits above the cells and fades in only once the field is dense enough to
+   read against, which is why it waits out most of the cover. */
+.pixelfx-label {
+  position: absolute;
+  inset: auto 0 12% 0;
+  text-align: center;
+  /* Side room so the caption never runs into the edge of a phone. */
+  padding: 0 16px;
+  margin: 0;
+  opacity: 0;
+  animation: pixelfx-label 420ms 260ms ease-out forwards;
+}
+
+/* The plate. Without it the caption sits on whatever squares are under it, and at
+   the green end of the ramp that is green on green. The fill is the ramp's pitch
+   black, the same value the Tech League scope uses for --canvas. */
+.pixelfx-label > span {
+  display: inline-block;
+  max-width: 100%;
+  padding: 9px 16px;
+  background: #080b12;
+  /* Mono rather than the condensed face the old rule asked for: this app never
+     loads a condensed family, so that stack was falling through to Arial Narrow. */
+  font-family: var(--mono);
+  /* Tracking has to come down with the width or the caption wraps to two lines on
+     a phone before it has anything to say. */
+  font-size: clamp(10px, 2.4vw, 13px);
+  font-weight: 700;
+  letter-spacing: clamp(0.1em, 1vw, 0.28em);
+  /* Letter-spacing hangs off the last character, so the text reads a touch left of
+     centre inside its own plate without this. */
+  text-indent: clamp(0.1em, 1vw, 0.28em);
+  text-transform: uppercase;
+  color: #3df07f;
+}
+
+@keyframes pixelfx-label {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* The component returns null under this setting and navigates immediately, so
+   nothing here should ever render. This is the belt to that braces: a few
+   hundred squares scaling at once is exactly what the setting is for. */
+@media (prefers-reduced-motion: reduce) {
+  .pixelfx { display: none; }
+}
+
+/* ============================================================
+   Tech League scope
+
+   The Tech League runs its own design system: a near-black pitch, neon green
+   as the brand carrier, electric blue and court purple as supports, expanded
+   display type. Rather than write a second set of components, this block
+   redefines the same tokens inside .tl-scope, so every .card, .btn, .table and
+   .pill already in this portal renders in the other scheme unchanged.
+
+   That is also why the pixel dissolve exists: the two schemes are far enough
+   apart that moving between them needs a beat.
+   ============================================================ */
+
+.tl-scope {
+  --gsu-blue: #3df07f;
+  --gsu-blue-bright: #6bff9f;
+  --gsu-blue-dim: #14b45c;
+
+  --brand: #3df07f;
+  --brand-hover: #14b45c;
+  --brand-soft: rgba(61, 240, 127, 0.12);
+  --brand-ink: #06210f;
+
+  --ink: #f2f6ff;
+  --ink-muted: #a8b4cc;
+  --ink-faint: #7d8aa3;
+
+  --paper: #111726;
+  --canvas: #080b12;
+  --surface: #111726;
+  --surface-subtle: #0b1019;
+  --surface-hover: #18202f;
+
+  --line: #263149;
+  --line-strong: #556a94;
+  --line-soft: rgba(85, 106, 148, 0.3);
+
+  --yellow: #ffc24d;
+  --lime: #3df07f;
+  --mint: #6bff9f;
+  --sky: #4d7cfe;
+  --pink: #a970ff;
+  --coral: #ff8a5f;
+  --orange: #ffc24d;
+  --violet: #a970ff;
+
+  --ok: #3df07f;   --ok-fill: #14b45c;   --ok-bg: rgba(61, 240, 127, 0.14);
+  --warn: #ffc24d; --warn-fill: #b8791f; --warn-bg: rgba(255, 194, 77, 0.14);
+  --bad: #ff6b5e;  --bad-fill: #b03a30;  --bad-bg: rgba(255, 107, 94, 0.14);
+
+  background: var(--canvas);
+  color: var(--ink);
+  /* The scope paints its own background, so it has to own the full column or
+     the cream shell shows through under short content. */
+  min-height: 100%;
+}
+
+/* The portal's shadows are hard ink offsets on paper. On the pitch an ink
+   shadow is invisible, so depth comes from a lit edge instead. */
+.tl-scope .card {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+.tl-scope .btn-primary {
+  box-shadow: 0 0 24px rgba(61, 240, 127, 0.22);
+}
+
+/* Headings in the Tech League's own display face, which this app already
+   loads nowhere else, so it is requested here and only here. */
+.tl-scope h1,
+.tl-scope h2,
+.tl-scope .card-title {
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-stretch: 125%;
+  text-transform: uppercase;
+  letter-spacing: 0.005em;
+}

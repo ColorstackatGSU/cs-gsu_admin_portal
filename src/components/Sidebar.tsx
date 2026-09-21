@@ -1,9 +1,11 @@
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../auth/AuthProvider';
 import { useUnmatchedCount } from '../hooks/useUnmatchedCount';
 import { useBotQueueCount } from '../hooks/useBotQueueCount';
 import { ORG } from '../data/org';
+import { isTechLeaguePath } from '../lib/access';
+import { pixelateThen } from '../lib/pixelate';
 
 /**
  * The signed-in shell's left column: a fixed 248px sidebar with the wordmark at
@@ -33,6 +35,7 @@ const NAV = [
   { to: '/resume-push', label: 'Resume push', icon: IconSend, badge: 'none' },
   { to: '/unmatched', label: 'Unmatched', icon: IconAlert, badge: 'unmatched' },
   { to: '/bot', label: 'Discord', icon: IconDiscord, badge: 'bot' },
+  { to: '/tech-league', label: 'Tech League', icon: IconTrophy, badge: 'none' },
   // Last on purpose: this is the screen that hands out every other screen.
   { to: '/access', label: 'Access', icon: IconKey, badge: 'none' },
 ] as const;
@@ -56,6 +59,12 @@ export default function Sidebar() {
       setOpen(false);
     }
   }
+
+  // True when a destination is on the other side of the design boundary from
+  // where we are now. Symmetric on purpose: leaving the Tech League is as much
+  // a scheme change as entering it, so it gets the same dissolve.
+  const here = useLocation().pathname;
+  const crosses = (to: string) => isTechLeaguePath(here) !== isTechLeaguePath(to);
 
   // Close on Escape. Without this a drawer opened by accident on a small screen
   // has no dismiss other than the scrim, which is not obvious.
@@ -118,7 +127,22 @@ export default function Sidebar() {
                 // them; every other item is its own exact page.
                 end={to === '/bot' ? false : undefined}
                 className={({ isActive }) => (isActive ? 'side-link active' : 'side-link')}
-                onClick={() => setOpen(false)}
+                onClick={(e) => {
+                  setOpen(false);
+                  // A click that crosses between the portal's scheme and the Tech
+                  // League's gets the pixel dissolve, in whichever direction it
+                  // crosses. Moving within one scheme navigates normally: the
+                  // effect marks the change of world, and firing it on every nav
+                  // would make it furniture.
+                  if (crosses(to)) {
+                    e.preventDefault();
+                    pixelateThen(
+                      () => nav(to),
+                      isTechLeaguePath(to) ? 'Entering the Tech League' : 'Back to the portal',
+                      isTechLeaguePath(to) ? 'to-tech-league' : 'to-portal',
+                    );
+                  }
+                }}
               >
                 <Icon />
                 {label}
@@ -162,6 +186,19 @@ export default function Sidebar() {
 /* ============ ICONS ============ */
 /* All 20x20, stroke 2.25, currentColor. Heavier than the usual feather weight so
    they carry the same visual mass as the 3px frames around them. */
+
+function IconTrophy() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M7 4h10v5a5 5 0 0 1-10 0V4Z" />
+      <path d="M7 6H4v1a3 3 0 0 0 3 3" />
+      <path d="M17 6h3v1a3 3 0 0 1-3 3" />
+      <path d="M12 14v3" />
+      <path d="M8.5 20h7" />
+      <path d="M10 17h4l1 3H9l1-3Z" />
+    </svg>
+  );
+}
 
 function IconKey() {
   return (
