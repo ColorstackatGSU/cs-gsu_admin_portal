@@ -133,8 +133,16 @@ function inlineBodyStyles(html: string): string {
  *     needs list management this does not have, but a real address and a
  *     sentence telling a member what to do. A bulk send with no way out is one
  *     of the strongest spam signals a young domain can give off.
+ *
+ * @param why  The footer's "you are getting this because" line. The Tech League
+ *             email passes its own, since plenty of the people it goes to are
+ *             not on the member roster and the default would tell them they are.
  */
-export function wrapTemplate(bodyHtml: string, subject: string): string {
+export function wrapTemplate(
+  bodyHtml: string,
+  subject: string,
+  why = `You are getting this because you are on the ${CHAPTER.short} member roster.`,
+): string {
   const body = inlineBodyStyles(bodyHtml);
 
   // The line the inbox shows next to the subject. The trailing joiners push the
@@ -228,7 +236,7 @@ ${body}
 <a href="mailto:${CHAPTER.email}" style="color:${BRAND};text-decoration:underline;">${CHAPTER.email}</a>
 </p>
 <p class="sh-muted" style="margin:14px 0 0;font-size:12px;line-height:1.55;color:#9ca3af;">
-You are getting this because you are on the ${CHAPTER.short} member roster.
+${escapeHtml(why)}
 <br>
 Reply to this email and we will take you off the list.
 </p>

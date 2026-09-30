@@ -22,6 +22,7 @@ import TechLeague from './pages/TechLeague';
 import TechLeagueReview from './pages/TechLeagueReview';
 import TechLeaguePool from './pages/TechLeaguePool';
 import TechLeagueScores from './pages/TechLeagueScores';
+import TechLeagueEmail from './pages/TechLeagueEmail';
 import NotFound from './pages/NotFound';
 
 /**
@@ -80,6 +81,9 @@ export default function App() {
         <Route path="tech-league/review" element={<ProtectedRoute><TechLeagueReview /></ProtectedRoute>} />
         <Route path="tech-league/pool" element={<ProtectedRoute><TechLeaguePool /></ProtectedRoute>} />
         <Route path="tech-league/scores" element={<ProtectedRoute><TechLeagueScores /></ProtectedRoute>} />
+
+        {/* The member email blast, narrowed to the people accepted into the league. */}
+        <Route path="tech-league/email" element={<ProtectedRoute><TechLeagueEmail /></ProtectedRoute>} />
 
         <Route path="*" element={<NotFound />} />
       </Route>

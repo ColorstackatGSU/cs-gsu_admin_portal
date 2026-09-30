@@ -37,8 +37,8 @@ const NAV = [
   { to: '/resume-push', label: 'Resume push', icon: IconSend, badge: 'none' },
   { to: '/unmatched', label: 'Unmatched', icon: IconAlert, badge: 'unmatched' },
   { to: '/bot', label: 'Discord', icon: IconDiscord, badge: 'bot' },
-  // A prefix, like /bot: the four Tech League screens carry their own section nav
-  // across the top, so listing three of them here again only made this column
+  // A prefix, like /bot: the Tech League screens carry their own section nav
+  // across the top, so listing the rest of them here again only made this column
   // taller. One row in, the sub-nav is the first thing on the page.
   { to: '/tech-league', label: 'Tech League', icon: IconTrophy, badge: 'none' },
   // Last on purpose: this is the screen that hands out every other screen.

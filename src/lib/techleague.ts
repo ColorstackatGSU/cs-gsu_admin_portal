@@ -1,6 +1,6 @@
 /**
- * Types and shared rules for the Tech League's three admin screens: the review
- * queue, the applicant pool and score entry.
+ * Types and shared rules for the Tech League's admin screens: the review queue,
+ * the applicant pool, score entry and the league email.
  *
  * These mirror the Java records the portal API answers with, which in turn mirror
  * the Tech League's own `/api/service` shapes. The frozen contract for both sides
@@ -71,6 +71,19 @@ export type DecisionResult = {
 /** Mirrors AdminTechLeagueController.ReopenResult. */
 export type ReopenResult = {
   application: Application;
+};
+
+/**
+ * Mirrors TechLeagueAdminService.LeagueEmailResult.
+ *
+ * `failed` is the school address of each person whose copy did not go. `skipped`
+ * counts the people who were checked but were no longer accepted when the send
+ * ran, which the server leaves out rather than refusing the whole send.
+ */
+export type LeagueEmailResult = {
+  sent: number;
+  failed: string[];
+  skipped: number;
 };
 
 /* ---- Scores --------------------------------------------------------------- */
@@ -157,6 +170,27 @@ export function emailTarget(a: Application): { address: string; note: string } {
     address: a.email,
     note: a.personalEmail ? 'school email; personal email not confirmed' : 'school email',
   };
+}
+
+/**
+ * Where a league email goes: the school address always, and the personal one as
+ * well once it is confirmed. Wider than emailTarget on purpose. A decision goes to
+ * the one address most likely to be read; season news goes everywhere they have
+ * proved they read, so it is not missed in an inbox they never open.
+ *
+ * The server applies the same rule when it sends. This copy exists so the list
+ * can say where each person's email is going before anything is sent.
+ */
+export function leagueAddresses(a: Application): string[] {
+  const addresses = [a.email];
+  if (
+    a.personalEmail &&
+    a.personalEmailVerified &&
+    a.personalEmail.toLowerCase() !== a.email.toLowerCase()
+  ) {
+    addresses.push(a.personalEmail);
+  }
+  return addresses;
 }
 
 /* ---- Queue filters -------------------------------------------------------- */

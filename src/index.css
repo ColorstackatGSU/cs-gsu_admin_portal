@@ -2058,3 +2058,64 @@ select.input:focus {
   font-family: var(--display);
   font-stretch: 125%;
 }
+
+/* ============================================================================
+   TECH LEAGUE EMAIL  (added with /tech-league/email)
+   ============================================================================
+   The accepted list and the composer. Tokens only, like the workspace block
+   above, so the list reads correctly in either scheme.
+   ==========================================================================*/
+
+.tl-recipients {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  max-height: 380px;
+  overflow-y: auto;
+  border: var(--bw-thin) solid var(--line);
+  border-radius: var(--radius, 0);
+}
+
+/* The whole row is the label, so the name toggles the box and not only the box. */
+.tl-recipient {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line-soft);
+  cursor: pointer;
+}
+.tl-recipients li:last-child .tl-recipient { border-bottom: none; }
+.tl-recipient:hover { background: var(--surface-hover); }
+.tl-recipient.is-on { background: var(--brand-soft); }
+.tl-recipient input { flex-shrink: 0; width: 17px; height: 17px; accent-color: var(--brand); }
+
+/* Where this person's copy goes. Mono, because addresses get compared by eye. */
+.tl-recipient-to {
+  flex: 0 1 auto;
+  max-width: 50%;
+  text-align: right;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--ink-muted);
+}
+
+@media (max-width: 640px) {
+  .tl-recipient { flex-wrap: wrap; }
+  .tl-recipient-to { flex-basis: 100%; max-width: none; text-align: left; padding-left: 29px; }
+}
+
+/* The editor draws its own hard ink shadow by hand, the same bug the hard-shadow
+   list above fixes for chips: --ink is near-white inside the scope, so it came out
+   as a white slab behind the composer. The editing surface itself stays white
+   on purpose, because that is the page the email is actually delivered on.
+
+   The colour is pinned for the same reason. The toolbar buttons and the size
+   select set no colour of their own and inherited the scope's near-white, so B,
+   I, U and H2 were white on white until this line. */
+.tl-scope .rte {
+  color: #091024;
+  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius);
+  overflow: hidden;
+}

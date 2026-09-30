@@ -46,6 +46,7 @@ const ROUTE_DATA: Record<string, string> = {
   '/tech-league/review': '/admin/tech-league/applications',
   '/tech-league/pool': '/admin/tech-league/applications',
   '/tech-league/scores': '/admin/tech-league/scores',
+  '/tech-league/email': '/admin/tech-league/applications',
 };
 
 /** Begins the GET for `path`, if one is not already in flight. */
