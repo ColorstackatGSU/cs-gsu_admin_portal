@@ -3,6 +3,7 @@ import { api } from '../lib/api';
 import { errorMessage, type Member } from '../lib/admin';
 import Confirm from '../components/Confirm';
 import RichTextEditor from '../components/RichTextEditor';
+import TermsNotice from '../components/TermsNotice';
 import { wrapTemplate } from '../lib/memberEmailTemplate';
 
 /**
@@ -152,6 +153,8 @@ export default function MemberEmail() {
           substitute per recipient.
         </p>
       </div>
+
+      <TermsNotice />
 
       {loadError && <div className="note note-error">{loadError}</div>}
       {error && <div className="note note-error" style={{ marginBottom: 16 }}>{error}</div>}
