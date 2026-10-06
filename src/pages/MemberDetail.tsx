@@ -20,6 +20,10 @@ import VerifiedBadge from '../components/VerifiedBadge';
  * Everything else stays read-only: members own their profile in the member portal, and an
  * admin edit path that overwrites their answers would erode that trust. A typo is different
  * because it is the thing locking them out of the portal where they would fix it themselves.
+ *
+ * Chapter email is the second exception, for the same kind of reason. Every bulk email
+ * says a reply is enough to be taken off the list, and somebody who never set up an
+ * account has no settings page to do it from, so an officer has to be able to do it here.
  */
 export default function MemberDetail() {
   const { id } = useParams<{ id: string }>();
@@ -95,6 +99,8 @@ export default function MemberDetail() {
             their personal one is theirs to change from their profile.
           </p>
         )}
+        <EmailOptInRow member={member} onChanged={setMember} />
+        <Field label="Texts" value={member.canText ? 'On' : 'Off'} />
         <Field label="Pronouns" value={member.pronouns} />
         <Field label="LinkedIn" value={member.linkedinUrl} link />
         <Field label="GitHub" value={member.githubUrl} link />
@@ -321,6 +327,85 @@ function EmailRow({
         >
           {done.text}
         </div>
+      )}
+    </>
+  );
+}
+
+/**
+ * Whether they get chapter email, with a button to change it for them.
+ *
+ * Opting somebody out is the common case: they replied to an email and asked. Putting
+ * them back is here too, because the same person can change their mind, but the
+ * confirmation says plainly that it should only follow them asking.
+ */
+function EmailOptInRow({
+  member,
+  onChanged,
+}: {
+  member: Member;
+  onChanged: (member: Member) => void;
+}) {
+  const [confirming, setConfirming] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [problem, setProblem] = useState<string | null>(null);
+  const optedIn = member.emailOptIn;
+
+  async function save() {
+    setSaving(true);
+    setProblem(null);
+    try {
+      onChanged(
+        await api.post<Member>(`/admin/members/${member.id}/email-opt-in`, { optIn: !optedIn }),
+      );
+      setConfirming(false);
+    } catch (err) {
+      setProblem(errorMessage(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <>
+      <Field
+        label="Chapter email"
+        value={optedIn ? 'On' : 'Opted out'}
+        badge={
+          confirming ? undefined : (
+            <button type="button" className="btn btn-ghost btn-sm" onClick={() => setConfirming(true)}>
+              {optedIn ? 'Opt out for them' : 'Opt back in'}
+            </button>
+          )
+        }
+      />
+      {confirming && (
+        <Confirm
+          style={{ marginLeft: 156, marginBottom: 12, maxWidth: 440 }}
+          question={
+            optedIn
+              ? `Take ${member.email} off the chapter email list?`
+              : `Put ${member.email} back on the chapter email list?`
+          }
+          points={
+            optedIn
+              ? [
+                  'They stop getting bulk email from the composer and the resume push.',
+                  'Account email still reaches them: sign-in codes, password resets, terms notices.',
+                  'They can turn it back on themselves from Settings in the member portal.',
+                ]
+              : [
+                  'Only do this because they asked. They opted out on purpose.',
+                  'They start getting bulk email from the composer and the resume push again.',
+                ]
+          }
+          confirmLabel={optedIn ? 'Opt them out' : 'Opt them back in'}
+          busy={saving}
+          busyLabel="Saving…"
+          problem={problem}
+          onConfirm={() => void save()}
+          onCancel={() => { setConfirming(false); setProblem(null); }}
+        />
       )}
     </>
   );
