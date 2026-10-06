@@ -34,6 +34,7 @@ const NAV = [
   { to: '/invoices', label: 'Invoices', icon: IconReceipt, badge: 'none' },
   { to: '/members', label: 'Members', icon: IconPeople, badge: 'none' },
   { to: '/members/email', label: 'Email members', icon: IconMail, badge: 'none' },
+  { to: '/members/text', label: 'Text members', icon: IconChat, badge: 'none' },
   { to: '/resume-push', label: 'Resume push', icon: IconSend, badge: 'none' },
   { to: '/unmatched', label: 'Unmatched', icon: IconAlert, badge: 'unmatched' },
   { to: '/bot', label: 'Discord', icon: IconDiscord, badge: 'bot' },
@@ -280,6 +281,15 @@ function IconMail() {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <rect x="3" y="5" width="18" height="14" rx="2" />
       <path d="M3 7l9 6 9-6" />
+    </svg>
+  );
+}
+
+function IconChat() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-8l-5 4v-4H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z" />
+      <path d="M8 10h8M8 13h5" />
     </svg>
   );
 }

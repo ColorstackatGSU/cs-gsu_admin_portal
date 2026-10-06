@@ -30,7 +30,7 @@ const EMPTY_FILTER: Filter = {
   hasResume: '', activated: '',
 };
 
-type SendResult = { sent: number; failed: string[] };
+type SendResult = { sent: number; failed: string[]; optedOut: number };
 
 const CLASS_YEARS = ['Freshman', 'Sophomore', 'Junior', 'Senior'];
 const GRAD_TERMS = ['Spring', 'Summer', 'Fall'];
@@ -86,7 +86,10 @@ export default function MemberEmail() {
     });
   }, [members, filter, search]);
 
-  const allShownSelected = filtered.length > 0 && filtered.every((m) => selected.has(m.id));
+  // Members who opted out of chapter email stay in the list, so an officer can see why
+  // somebody is not getting mail, but they cannot be picked. The backend drops them too.
+  const selectable = useMemo(() => filtered.filter((m) => m.emailOptIn), [filtered]);
+  const allShownSelected = selectable.length > 0 && selectable.every((m) => selected.has(m.id));
 
   function toggleOne(id: string) {
     setSelected((prev) => {
@@ -101,9 +104,9 @@ export default function MemberEmail() {
     setSelected((prev) => {
       const next = new Set(prev);
       if (allShownSelected) {
-        filtered.forEach((m) => next.delete(m.id));
+        selectable.forEach((m) => next.delete(m.id));
       } else {
-        filtered.forEach((m) => next.add(m.id));
+        selectable.forEach((m) => next.add(m.id));
       }
       return next;
     });
@@ -160,6 +163,7 @@ export default function MemberEmail() {
               <>Failed for {result.failed.length}: {result.failed.slice(0, 5).join(', ')}
                 {result.failed.length > 5 ? '…' : ''}</>
             )}
+            {result.optedOut > 0 && <> Skipped {result.optedOut} who opted out of chapter email.</>}
           </p>
         </div>
       )}
@@ -220,7 +224,7 @@ export default function MemberEmail() {
                 Selected <strong>{selected.size}</strong>.
               </span>
               <button type="button" className="btn btn-secondary btn-sm" onClick={toggleAllShown}
-                      disabled={filtered.length === 0}>
+                      disabled={selectable.length === 0}>
                 {allShownSelected ? 'Deselect all shown' : 'Select all shown'}
               </button>
               {selected.size > 0 && (
@@ -247,6 +251,7 @@ export default function MemberEmail() {
                       <input
                         type="checkbox"
                         checked={selected.has(m.id)}
+                        disabled={!m.emailOptIn}
                         onChange={() => toggleOne(m.id)}
                         aria-label={`Select ${m.email}`}
                       />
@@ -260,6 +265,7 @@ export default function MemberEmail() {
                             ? ` · ${[m.gradTerm, m.gradYear].filter(Boolean).join(' ')}`
                             : ''}
                           {m.majors ? ` · ${m.majors}` : ''}
+                          {!m.emailOptIn ? ' · Opted out of email' : ''}
                         </div>
                       </div>
                     </li>

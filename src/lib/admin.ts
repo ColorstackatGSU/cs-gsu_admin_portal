@@ -91,6 +91,10 @@ export type Member = {
   resumeUploadedAt: string | null;
   activatedAt: string | null;
   createdAt: string;
+  /** False once they opted out of chapter email. The backend skips them on a bulk send. */
+  emailOptIn: boolean;
+  /** Turned texts on and has a number on file. The number itself is not sent here. */
+  canText: boolean;
 };
 
 /** Which address a correction fixes. Mirrors AdminPortalService.EmailField. */

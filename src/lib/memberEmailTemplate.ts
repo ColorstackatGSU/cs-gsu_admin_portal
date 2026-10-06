@@ -16,6 +16,7 @@ const CHAPTER = {
   name: 'ColorStack at Georgia State University',
   short: 'ColorStack at GSU',
   site: 'https://colorstackatgsu.com',
+  settings: 'https://members.colorstackatgsu.com/settings',
   email: 'official@colorstackatgsu.com',
   logo: 'https://sponsors.colorstackatgsu.com/images/colorstack-gsu-logo.png',
 };
@@ -129,21 +130,27 @@ function inlineBodyStyles(html: string): string {
  *   - Preheader padding. Without the trailing joiners the inbox preview filled
  *     the rest of the line from the footer, so every message previewed as
  *     "... You are getting this because you signed up".
- *   - A footer that says how to stop. Not a List-Unsubscribe header, which
- *     needs list management this does not have, but a real address and a
- *     sentence telling a member what to do. A bulk send with no way out is one
- *     of the strongest spam signals a young domain can give off.
+ *   - A footer that says how to stop: a link to the member's own settings,
+ *     where the opt-out lives, and replying as the fallback for somebody who
+ *     never set up an account. A bulk send with no way out is one of the
+ *     strongest spam signals a young domain can give off.
  *
  * @param why  The footer's "you are getting this because" line. The Tech League
  *             email passes its own, since plenty of the people it goes to are
  *             not on the member roster and the default would tell them they are.
+ *             Passing one also drops the settings link, for the same reason: the
+ *             opt-out in a member's settings only governs mail sent to members.
  */
 export function wrapTemplate(
   bodyHtml: string,
   subject: string,
-  why = `You are getting this because you are on the ${CHAPTER.short} member roster.`,
+  why?: string,
 ): string {
   const body = inlineBodyStyles(bodyHtml);
+
+  const stop = why
+    ? 'Reply to this email and we will take you off the list.'
+    : `To stop these emails, <a href="${CHAPTER.settings}" style="color:${BRAND};text-decoration:underline;">turn them off in your settings</a>, or reply and we will take you off the list.`;
 
   // The line the inbox shows next to the subject. The trailing joiners push the
   // client's own filler past the end of the preview so the footer never shows.
@@ -236,9 +243,9 @@ ${body}
 <a href="mailto:${CHAPTER.email}" style="color:${BRAND};text-decoration:underline;">${CHAPTER.email}</a>
 </p>
 <p class="sh-muted" style="margin:14px 0 0;font-size:12px;line-height:1.55;color:#9ca3af;">
-${escapeHtml(why)}
+${escapeHtml(why ?? `You are getting this because you are a ${CHAPTER.short} member.`)}
 <br>
-Reply to this email and we will take you off the list.
+${stop}
 </p>
 </td>
 </tr>
