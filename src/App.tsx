@@ -13,6 +13,7 @@ import MemberDetail from './pages/MemberDetail';
 import MemberEmail from './pages/MemberEmail';
 import MemberText from './pages/MemberText';
 import ResumePush from './pages/ResumePush';
+import ResumeBook from './pages/ResumeBook';
 import BotOverview from './pages/BotOverview';
 import BotQueue from './pages/BotQueue';
 import BotLinks from './pages/BotLinks';
@@ -58,6 +59,10 @@ export default function App() {
         {/* The resume push. One email per member with no resume, and a button that cannot be
             undone, so it shows the arithmetic before it offers to run and the results after. */}
         <Route path="resume-push" element={<ProtectedRoute><ResumePush /></ProtectedRoute>} />
+
+        {/* The resume book as a ZIP for one sponsor. Next to the push because they are the
+            two ends of the same thing: getting resumes in, and handing them on. */}
+        <Route path="resume-book" element={<ProtectedRoute><ResumeBook /></ProtectedRoute>} />
 
         {/* Discord. The bot used to be its own deployment with its own state; these four
             screens are the officer-facing half of absorbing it, and /bot/queue is the one

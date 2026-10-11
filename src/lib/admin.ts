@@ -95,6 +95,8 @@ export type Member = {
   emailOptIn: boolean;
   /** Turned texts on and has a number on file. The number itself is not sent here. */
   canText: boolean;
+  /** They asked for their addresses to be withheld from sponsors. Set by an officer. */
+  sponsorContactHidden: boolean;
 };
 
 /** Which address a correction fixes. Mirrors AdminPortalService.EmailField. */
@@ -195,6 +197,42 @@ export type ResumePushStuck = {
 export type ResumePushReport = {
   results: ResumePushResults[];
   stuck: ResumePushStuck[];
+};
+
+/* ---- Resume book ---------------------------------------------------------- */
+
+/** Mirrors ResumeBookService.SponsorOption. */
+export type ResumeBookSponsor = {
+  id: string;
+  name: string;
+  slug: string;
+  tierName: string | null;
+  /** Whether their tier includes the resume book. The database decides, not this app. */
+  eligible: boolean;
+};
+
+/** Mirrors ResumeBookService.Export. One ZIP an officer downloaded. */
+export type ResumeBookExport = {
+  id: string;
+  sponsorName: string;
+  exportedBy: string;
+  exportedAt: string;
+  /** Null when the copy was everybody. */
+  gradYears: number[] | null;
+  members: number;
+  /** Members whose file could not be read from storage, so they are not in that copy. */
+  skipped: number;
+};
+
+/** Mirrors ResumeBookService.Overview. */
+export type ResumeBookOverview = {
+  /** Activated members with a resume on file. */
+  members: number;
+  contactHidden: number;
+  /** gradYear is null for members who never gave one. */
+  gradYears: { gradYear: number | null; members: number }[];
+  sponsors: ResumeBookSponsor[];
+  exports: ResumeBookExport[];
 };
 
 export type Unmatched = {

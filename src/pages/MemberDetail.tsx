@@ -24,6 +24,9 @@ import VerifiedBadge from '../components/VerifiedBadge';
  * Chapter email is the second exception, for the same kind of reason. Every bulk email
  * says a reply is enough to be taken off the list, and somebody who never set up an
  * account has no settings page to do it from, so an officer has to be able to do it here.
+ *
+ * Withholding their addresses from sponsors is the third. The privacy policy tells members
+ * to write to us for it, so this is where an officer acts on that message.
  */
 export default function MemberDetail() {
   const { id } = useParams<{ id: string }>();
@@ -140,10 +143,12 @@ export default function MemberDetail() {
             className="btn btn-primary btn-sm"
             onClick={openResume}
             disabled={opening}
+            style={{ marginBottom: 8 }}
           >
             {opening ? 'Opening…' : 'View resume ↗'}
           </button>
         )}
+        <SponsorContactRow member={member} onChanged={setMember} />
       </section>
 
       <section className="card">
@@ -400,6 +405,85 @@ function EmailOptInRow({
                 ]
           }
           confirmLabel={optedIn ? 'Opt them out' : 'Opt them back in'}
+          busy={saving}
+          busyLabel="Saving…"
+          problem={problem}
+          onConfirm={() => void save()}
+          onCancel={() => { setConfirming(false); setProblem(null); }}
+        />
+      )}
+    </>
+  );
+}
+
+/**
+ * Whether sponsors get this member's email addresses, with a button to change it.
+ *
+ * Withholding is the common direction: they wrote in and asked. It covers the sponsor
+ * directory and every resume book built from now on, and the confirmation says plainly
+ * that it cannot reach a copy a sponsor already has.
+ */
+function SponsorContactRow({
+  member,
+  onChanged,
+}: {
+  member: Member;
+  onChanged: (member: Member) => void;
+}) {
+  const [confirming, setConfirming] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [problem, setProblem] = useState<string | null>(null);
+  const hidden = member.sponsorContactHidden;
+
+  async function save() {
+    setSaving(true);
+    setProblem(null);
+    try {
+      onChanged(
+        await api.post<Member>(`/admin/members/${member.id}/sponsor-contact`, { hidden: !hidden }),
+      );
+      setConfirming(false);
+    } catch (err) {
+      setProblem(errorMessage(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <>
+      <Field
+        label="Emails to sponsors"
+        value={hidden ? 'Withheld' : 'Shared'}
+        badge={
+          confirming ? undefined : (
+            <button type="button" className="btn btn-ghost btn-sm" onClick={() => setConfirming(true)}>
+              {hidden ? 'Share again' : 'Withhold for them'}
+            </button>
+          )
+        }
+      />
+      {confirming && (
+        <Confirm
+          style={{ marginLeft: 156, marginBottom: 12, maxWidth: 440 }}
+          question={
+            hidden
+              ? `Share ${member.email}'s addresses with sponsors again?`
+              : `Withhold ${member.email}'s addresses from sponsors?`
+          }
+          points={
+            hidden
+              ? [
+                  'Only do this because they asked. They had them withheld on purpose.',
+                  'Their addresses show in the sponsor directory and in resume books built from now on.',
+                ]
+              : [
+                  'Their student and personal addresses are left blank in the sponsor directory and in resume books built from now on.',
+                  'Their name, majors, graduation, LinkedIn and resume are still shared. A resume usually has an address printed on it.',
+                  'It does not change a copy a sponsor has already been given.',
+                ]
+          }
+          confirmLabel={hidden ? 'Share them' : 'Withhold them'}
           busy={saving}
           busyLabel="Saving…"
           problem={problem}

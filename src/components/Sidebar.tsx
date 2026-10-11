@@ -36,6 +36,7 @@ const NAV = [
   { to: '/members/email', label: 'Email members', icon: IconMail, badge: 'none' },
   { to: '/members/text', label: 'Text members', icon: IconChat, badge: 'none' },
   { to: '/resume-push', label: 'Resume push', icon: IconSend, badge: 'none' },
+  { to: '/resume-book', label: 'Resume book', icon: IconBook, badge: 'none' },
   { to: '/unmatched', label: 'Unmatched', icon: IconAlert, badge: 'unmatched' },
   { to: '/bot', label: 'Discord', icon: IconDiscord, badge: 'bot' },
   // A prefix, like /bot: the Tech League screens carry their own section nav
@@ -301,6 +302,17 @@ function IconSend() {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M21 3 10.5 13.5" />
       <path d="M21 3l-6.5 18-4-8.5L2 8.5 21 3z" />
+    </svg>
+  );
+}
+
+/* A closed book with a ribbon, for the resume book export. */
+function IconBook() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M5 4a1 1 0 0 1 1-1h13v15H6.5A1.5 1.5 0 0 0 5 19.5V4z" />
+      <path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19" />
+      <path d="M10 3v7l2.5-2 2.5 2V3" />
     </svg>
   );
 }
