@@ -83,13 +83,14 @@ export default function TermsNotice() {
 
       {preview.toSend === 0 ? (
         <p className="muted" style={{ margin: 0 }}>
-          All {preview.people} members have been told about the October 5 terms change.
+          All {preview.people} members have been told about the October 9 terms change.
         </p>
       ) : (
         <>
           <p style={{ marginTop: 0 }}>
-            The terms changed on October 5: members can now opt out of chapter email, and add a
-            phone number to get texts. The terms promise an email when they change, and{' '}
+            The terms changed on October 9: members can now opt out of chapter email, add a
+            phone number to get texts, and sponsors can be given the resume book as files with
+            both of a member's addresses. The terms promise an email when they change, and{' '}
             <strong>{preview.toSend}</strong> of {preview.people} members have not had it.
           </p>
           <p className="muted" style={{ fontSize: 14 }}>
