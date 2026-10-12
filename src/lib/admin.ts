@@ -207,8 +207,18 @@ export type ResumeBookSponsor = {
   name: string;
   slug: string;
   tierName: string | null;
-  /** Whether their tier includes the resume book. The database decides, not this app. */
+  /** Whether their tier includes the resume book in the sponsor portal. Shown, not enforced. */
   eligible: boolean;
+};
+
+/** Mirrors ResumeBookService.RosterMember. Somebody in the book, for the picker. */
+export type ResumeBookMember = {
+  id: string;
+  name: string | null;
+  email: string;
+  majors: string | null;
+  classYear: string | null;
+  gradYear: number | null;
 };
 
 /** Mirrors ResumeBookService.Export. One ZIP an officer downloaded. */
@@ -217,8 +227,10 @@ export type ResumeBookExport = {
   sponsorName: string;
   exportedBy: string;
   exportedAt: string;
-  /** Null when the copy was everybody. */
+  /** Null unless the copy was narrowed by graduation year. */
   gradYears: number[] | null;
+  /** The officer chose the members one by one. */
+  handPicked: boolean;
   members: number;
   /** Members whose file could not be read from storage, so they are not in that copy. */
   skipped: number;
@@ -231,6 +243,8 @@ export type ResumeBookOverview = {
   contactHidden: number;
   /** gradYear is null for members who never gave one. */
   gradYears: { gradYear: number | null; members: number }[];
+  /** Everybody in the book, by surname. */
+  roster: ResumeBookMember[];
   sponsors: ResumeBookSponsor[];
   exports: ResumeBookExport[];
 };

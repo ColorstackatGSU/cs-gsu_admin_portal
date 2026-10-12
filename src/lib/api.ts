@@ -139,6 +139,9 @@ export const api = {
    * tab or hand them to a download.
    */
   blob: async (path: string): Promise<Blob> => (await send(path, { method: 'GET' })).blob(),
+  /** The same, for a file the server builds from a JSON body: the resume book export. */
+  blobPost: async (path: string, body: unknown): Promise<Blob> =>
+    (await send(path, { method: 'POST', body: JSON.stringify(body) })).blob(),
   patch: <T>(path: string, body?: unknown) =>
     request<T>(path, { method: 'PATCH', body: body == null ? undefined : JSON.stringify(body) }),
   delete: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
