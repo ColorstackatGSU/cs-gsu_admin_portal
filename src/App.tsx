@@ -14,6 +14,7 @@ import MemberEmail from './pages/MemberEmail';
 import MemberText from './pages/MemberText';
 import ResumePush from './pages/ResumePush';
 import ResumeBook from './pages/ResumeBook';
+import Events from './pages/Events';
 import BotOverview from './pages/BotOverview';
 import BotQueue from './pages/BotQueue';
 import BotLinks from './pages/BotLinks';
@@ -55,6 +56,10 @@ export default function App() {
         <Route path="members/:id" element={<ProtectedRoute><MemberDetail /></ProtectedRoute>} />
         <Route path="members/email" element={<ProtectedRoute><MemberEmail /></ProtectedRoute>} />
         <Route path="members/text" element={<ProtectedRoute><MemberText /></ProtectedRoute>} />
+
+        {/* What members see on the member portal's Events page. Officers write events here
+            instead of a developer typing them into that portal's code. */}
+        <Route path="events" element={<ProtectedRoute><Events /></ProtectedRoute>} />
 
         {/* The resume push. One email per member with no resume, and a button that cannot be
             undone, so it shows the arithmetic before it offers to run and the results after. */}

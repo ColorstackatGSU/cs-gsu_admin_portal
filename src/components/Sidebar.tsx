@@ -35,6 +35,7 @@ const NAV = [
   { to: '/members', label: 'Members', icon: IconPeople, badge: 'none' },
   { to: '/members/email', label: 'Email members', icon: IconMail, badge: 'none' },
   { to: '/members/text', label: 'Text members', icon: IconChat, badge: 'none' },
+  { to: '/events', label: 'Events', icon: IconCalendar, badge: 'none' },
   { to: '/resume-push', label: 'Resume push', icon: IconSend, badge: 'none' },
   { to: '/resume-book', label: 'Resume book', icon: IconBook, badge: 'none' },
   { to: '/unmatched', label: 'Unmatched', icon: IconAlert, badge: 'unmatched' },
@@ -302,6 +303,18 @@ function IconSend() {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M21 3 10.5 13.5" />
       <path d="M21 3l-6.5 18-4-8.5L2 8.5 21 3z" />
+    </svg>
+  );
+}
+
+/* A calendar page, for the events members see on their portal. */
+function IconCalendar() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="5" width="18" height="16" rx="1" />
+      <path d="M3 10h18" />
+      <path d="M8 3v4" />
+      <path d="M16 3v4" />
     </svg>
   );
 }
