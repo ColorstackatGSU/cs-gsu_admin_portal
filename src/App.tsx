@@ -42,7 +42,7 @@ export default function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route index element={<Navigate to="/sponsors" replace />} />
+        <Route index element={<Navigate to="/members" replace />} />
         <Route path="login" element={<Login />} />
 
         <Route path="sponsors" element={<ProtectedRoute><Sponsors /></ProtectedRoute>} />

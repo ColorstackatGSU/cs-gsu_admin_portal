@@ -1,4 +1,4 @@
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../auth/AuthProvider';
 import { useUnmatchedCount } from '../hooks/useUnmatchedCount';
@@ -29,24 +29,82 @@ import { guardNavigation } from '../lib/unsaved';
  * Icons are inline SVG rather than a dependency. Drawn at stroke 2.25 so they
  * hold up next to the uppercase labels.
  */
-const NAV = [
-  { to: '/sponsors', label: 'Sponsors', icon: IconBuilding, badge: 'none' },
-  { to: '/invoices', label: 'Invoices', icon: IconReceipt, badge: 'none' },
-  { to: '/members', label: 'Members', icon: IconPeople, badge: 'none' },
-  { to: '/members/email', label: 'Email members', icon: IconMail, badge: 'none' },
-  { to: '/members/text', label: 'Text members', icon: IconChat, badge: 'none' },
-  { to: '/events', label: 'Events', icon: IconCalendar, badge: 'none' },
-  { to: '/resume-push', label: 'Resume push', icon: IconSend, badge: 'none' },
-  { to: '/resume-book', label: 'Resume book', icon: IconBook, badge: 'none' },
-  { to: '/unmatched', label: 'Unmatched', icon: IconAlert, badge: 'unmatched' },
-  { to: '/bot', label: 'Discord', icon: IconDiscord, badge: 'bot' },
-  // A prefix, like /bot: the Tech League screens carry their own section nav
-  // across the top, so listing the rest of them here again only made this column
-  // taller. One row in, the sub-nav is the first thing on the page.
-  { to: '/tech-league', label: 'Tech League', icon: IconTrophy, badge: 'none' },
-  // Last on purpose: this is the screen that hands out every other screen.
-  { to: '/access', label: 'Access', icon: IconKey, badge: 'none' },
-] as const;
+type Badge = 'none' | 'unmatched' | 'bot';
+type Item = { to: string; label: string; icon: () => React.JSX.Element; badge: Badge };
+type Group = { key: string; label: string; items: Item[] };
+
+/*
+ * Grouped, because a flat list of eleven framed blocks was taller than a laptop
+ * screen and every item had the same weight. Each group folds, so the column
+ * shows the section you are working in and a header for each of the others.
+ *
+ * Ordered by how often officers actually open them: members and events every week,
+ * sponsors and invoices a few times a semester. Sponsors used to be first only
+ * because the portal was built for billing before it was built for anything else.
+ */
+const GROUPS: Group[] = [
+  {
+    key: 'members',
+    label: 'Members',
+    items: [
+      { to: '/members', label: 'Members', icon: IconPeople, badge: 'none' },
+      { to: '/events', label: 'Events', icon: IconCalendar, badge: 'none' },
+      { to: '/members/email', label: 'Email members', icon: IconMail, badge: 'none' },
+      { to: '/members/text', label: 'Text members', icon: IconChat, badge: 'none' },
+    ],
+  },
+  {
+    key: 'community',
+    label: 'Community',
+    items: [
+      { to: '/bot', label: 'Discord', icon: IconDiscord, badge: 'bot' },
+      // A prefix, like /bot: the Tech League screens carry their own section nav
+      // across the top, so listing the rest of them here again only made this column
+      // taller. One row in, the sub-nav is the first thing on the page.
+      { to: '/tech-league', label: 'Tech League', icon: IconTrophy, badge: 'none' },
+    ],
+  },
+  {
+    key: 'resumes',
+    label: 'Resumes',
+    items: [
+      { to: '/resume-push', label: 'Resume push', icon: IconSend, badge: 'none' },
+      { to: '/resume-book', label: 'Resume book', icon: IconBook, badge: 'none' },
+    ],
+  },
+  {
+    key: 'sponsors',
+    label: 'Sponsors and billing',
+    items: [
+      { to: '/sponsors', label: 'Sponsors', icon: IconBuilding, badge: 'none' },
+      { to: '/invoices', label: 'Invoices', icon: IconReceipt, badge: 'none' },
+      { to: '/unmatched', label: 'Unmatched', icon: IconAlert, badge: 'unmatched' },
+    ],
+  },
+];
+
+// On its own, last on purpose: this is the screen that hands out every other screen.
+const ACCESS: Item = { to: '/access', label: 'Access', icon: IconKey, badge: 'none' };
+
+/**
+ * Whether `path` belongs to the item at `to`: the screen itself or anything under it,
+ * so a sponsor's own page keeps Sponsors lit. Members is the one exception, because
+ * Email and Text live under /members but are items of their own.
+ */
+const OWN_ITEMS = ['/members/email', '/members/text'];
+const matches = (path: string, to: string) =>
+  path === to ||
+  (path.startsWith(to + '/') && !(to === '/members' && OWN_ITEMS.includes(path)));
+
+const FOLD_KEY = 'admin.sidebar.folds';
+
+function readFolds(): Record<string, boolean> {
+  try {
+    return JSON.parse(localStorage.getItem(FOLD_KEY) ?? '{}') as Record<string, boolean>;
+  } catch {
+    return {};
+  }
+}
 
 export default function Sidebar() {
   const [open, setOpen] = useState(false);
@@ -55,6 +113,9 @@ export default function Sidebar() {
   const unmatched = useUnmatchedCount();
   const botQueue = useBotQueueCount();
   const nav = useNavigate();
+  // Only groups the officer has opened or closed by hand are stored. Any other group
+  // is open exactly when it holds the current screen.
+  const [folds, setFolds] = useState<Record<string, boolean>>(readFolds);
 
   async function handleSignOut() {
     if (signingOut) return;
@@ -74,6 +135,19 @@ export default function Sidebar() {
   const here = useLocation().pathname;
   const crosses = (to: string) => isTechLeaguePath(here) !== isTechLeaguePath(to);
 
+  const countFor = (badge: Badge) =>
+    badge === 'unmatched' ? unmatched : badge === 'bot' ? botQueue : null;
+
+  function toggle(key: string, isOpen: boolean) {
+    const next = { ...folds, [key]: !isOpen };
+    setFolds(next);
+    try {
+      localStorage.setItem(FOLD_KEY, JSON.stringify(next));
+    } catch {
+      // Private windows can refuse storage; the fold still works for this visit.
+    }
+  }
+
   // Close on Escape. Without this a drawer opened by accident on a small screen
   // has no dismiss other than the scrim, which is not obvious.
   useEffect(() => {
@@ -82,6 +156,62 @@ export default function Sidebar() {
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, [open]);
+
+  function renderItem(item: Item, sub: boolean) {
+    const { to, label, icon: Icon } = item;
+    const count = countFor(item.badge);
+    return (
+      <Link
+        key={to}
+        to={to}
+        // Lit by matches() rather than NavLink's own rule, which cannot tell that
+        // /members/email is not part of Members.
+        className={`side-link${sub ? ' side-link-sub' : ''}${matches(here, to) ? ' active' : ''}`}
+        aria-current={matches(here, to) ? 'page' : undefined}
+        onClick={(e) => {
+          setOpen(false);
+
+          // Every navigation from here is taken over, so a screen holding
+          // unsaved work gets asked about first. The link's own navigation
+          // has to be cancelled either way: it would race the question.
+          e.preventDefault();
+
+          // Start the destination's request now rather than when it mounts.
+          // What follows is up to 620ms of dissolve, and previously none of
+          // it was spent fetching. Fired before the unsaved-work guard on
+          // purpose: if a question appears, the request runs while it is
+          // being read, and a GET nobody ends up needing is thrown away.
+          warmRoute(to);
+
+          // A click that crosses between the portal's scheme and the Tech
+          // League's gets the pixel dissolve, in whichever direction it
+          // crosses. Moving within one scheme navigates normally: the
+          // effect marks the change of world, and firing it on every nav
+          // would make it furniture.
+          const go = crosses(to)
+            ? () =>
+                pixelateThen(
+                  () => nav(to),
+                  isTechLeaguePath(to) ? 'Entering the Tech League' : 'Back to the portal',
+                  isTechLeaguePath(to) ? 'to-tech-league' : 'to-portal',
+                )
+            : () => nav(to);
+
+          // Blocked means a question is now on screen, and starting the
+          // dissolve would cover it.
+          guardNavigation(go);
+        }}
+      >
+        <Icon />
+        {label}
+        {count != null && count > 0 && (
+          <span className="side-count" aria-label={`${count} waiting`}>
+            {count}
+          </span>
+        )}
+      </Link>
+    );
+  }
 
   return (
     <>
@@ -124,74 +254,52 @@ export default function Sidebar() {
         </div>
 
         <nav className="side-nav" aria-label="Primary">
-          {NAV.map((item) => {
-            const { to, label, icon: Icon, badge } = item;
-            const count =
-              badge === 'unmatched' ? unmatched : badge === 'bot' ? botQueue : null;
+          {GROUPS.map((g) => {
+            const holdsHere = g.items.some((i) => matches(here, i.to));
+            const isOpen = folds[g.key] ?? holdsHere;
+            // A folded group still says when something inside it is waiting.
+            const waiting = g.items.reduce((n, i) => n + (countFor(i.badge) ?? 0), 0);
+            const panel = `side-group-${g.key}`;
             return (
-              <NavLink
-                key={to}
-                to={to}
-                // /bot is a prefix for four screens, so it stays lit on all of
-                // them; every other item is its own exact page.
-                end={to === '/bot' || to === '/tech-league' ? false : undefined}
-                className={({ isActive }) => (isActive ? 'side-link active' : 'side-link')}
-                onClick={(e) => {
-                  setOpen(false);
-
-                  // Every navigation from here is taken over, so a screen holding
-                  // unsaved work gets asked about first. The link's own navigation
-                  // has to be cancelled either way: it would race the question.
-                  e.preventDefault();
-
-                  // Start the destination's request now rather than when it mounts.
-                  // What follows is up to 620ms of dissolve, and previously none of
-                  // it was spent fetching. Fired before the unsaved-work guard on
-                  // purpose: if a question appears, the request runs while it is
-                  // being read, and a GET nobody ends up needing is thrown away.
-                  warmRoute(to);
-
-                  // A click that crosses between the portal's scheme and the Tech
-                  // League's gets the pixel dissolve, in whichever direction it
-                  // crosses. Moving within one scheme navigates normally: the
-                  // effect marks the change of world, and firing it on every nav
-                  // would make it furniture.
-                  const go = crosses(to)
-                    ? () =>
-                        pixelateThen(
-                          () => nav(to),
-                          isTechLeaguePath(to) ? 'Entering the Tech League' : 'Back to the portal',
-                          isTechLeaguePath(to) ? 'to-tech-league' : 'to-portal',
-                        )
-                    : () => nav(to);
-
-                  // Blocked means a question is now on screen, and starting the
-                  // dissolve would cover it.
-                  guardNavigation(go);
-                }}
-              >
-                <Icon />
-                {label}
-                {count != null && count > 0 && (
-                  <span className="side-count" aria-label={`${count} waiting`}>
-                    {count}
-                  </span>
+              <div key={g.key} className="side-group">
+                <button
+                  type="button"
+                  className={`side-group-head${holdsHere ? ' here' : ''}`}
+                  aria-expanded={isOpen}
+                  aria-controls={panel}
+                  onClick={() => toggle(g.key, isOpen)}
+                >
+                  <IconChevron open={isOpen} />
+                  {g.label}
+                  {!isOpen && waiting > 0 && (
+                    <span className="side-count" aria-label={`${waiting} waiting`}>
+                      {waiting}
+                    </span>
+                  )}
+                </button>
+                {isOpen && (
+                  <div id={panel} className="side-group-items">
+                    {g.items.map((i) => renderItem(i, true))}
+                  </div>
                 )}
-              </NavLink>
+              </div>
             );
           })}
+          <div className="side-group-solo">{renderItem(ACCESS, false)}</div>
         </nav>
 
         <div className="side-foot">
           {/* The sponsor-facing side of the same data. Officers check it often
               enough ("what does this actually look like to them?") that hunting
               for the URL every time is friction worth removing. */}
-          <div className="side-help">
-            <span className="side-help-title">Sponsor view</span>
-            <a href={ORG.sponsorPortal} target="_blank" rel="noopener noreferrer">
-              {ORG.sponsorPortal.replace(/^https?:\/\//, '')}
-            </a>
-          </div>
+          <a
+            className="side-ext"
+            href={ORG.sponsorPortal}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Sponsor view ↗
+          </a>
 
           <button
             type="button"
@@ -303,6 +411,24 @@ function IconSend() {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M21 3 10.5 13.5" />
       <path d="M21 3l-6.5 18-4-8.5L2 8.5 21 3z" />
+    </svg>
+  );
+}
+
+/* The fold marker on a group header: points right when closed, down when open. */
+function IconChevron({ open }: { open: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      style={{ transform: open ? 'rotate(90deg)' : 'none', transition: 'transform 120ms ease' }}
+    >
+      <path d="M9 6l6 6-6 6" />
     </svg>
   );
 }

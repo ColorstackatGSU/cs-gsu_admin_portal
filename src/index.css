@@ -279,17 +279,49 @@
 }
 .side-link.active .side-count { background: var(--yellow); }
 
-/* Support sticker above sign out. Slightly off-axis so the column has one thing
-   in it that is not on the grid. */
-.side-help {
-  border: var(--bw) solid var(--ink);
-  background: var(--yellow);
-  box-shadow: var(--shadow-sm);
-  padding: 11px 12px;
-  transform: rotate(-1.4deg);
+/* Folding groups. The header is lighter than a link on purpose: it is a label you
+   can click, not a destination, so it carries no frame or shadow. */
+.side-group { display: flex; flex-direction: column; gap: 6px; }
+.side-group-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 6px 4px;
+  background: none;
+  border: 0;
+  font-family: var(--font);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  cursor: pointer;
+  text-align: left;
 }
-.side-help-title { font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }
-.side-help a { display: block; margin-top: 4px; font-size: 12px; font-weight: 500; word-break: break-all; text-decoration: underline; text-underline-offset: 2px; }
+.side-group-head svg { width: 14px; height: 14px; flex-shrink: 0; }
+.side-group-head:hover { color: var(--ink); }
+.side-group-head.here { color: var(--ink); }
+.side-group-items { display: flex; flex-direction: column; gap: 6px; margin-bottom: 4px; }
+.side-group-solo { margin-top: 6px; }
+
+/* Items inside a group sit a step smaller than a top-level link, so the column
+   reads as headers with things under them rather than one long ladder. */
+.side-link-sub { padding: 7px 10px; font-size: 12px; }
+.side-link-sub svg { width: 18px; height: 18px; }
+
+/* The sponsor-facing portal, one line instead of a sticker. */
+.side-ext {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  color: var(--ink-muted);
+  padding: 0 4px;
+}
+.side-ext:hover { color: var(--ink); }
 
 .side-top { display: none; }
 .scrim { display: none; }

@@ -27,7 +27,7 @@ export default function Login() {
   // state) and the 401 handler in api.ts (window.location.assign, carries
   // `?from=`). Prefer the state value when both are present.
   const from =
-    (location.state as { from?: string } | null)?.from ?? search.get('from') ?? '/sponsors';
+    (location.state as { from?: string } | null)?.from ?? search.get('from') ?? '/members';
 
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');

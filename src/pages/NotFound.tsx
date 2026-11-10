@@ -9,8 +9,8 @@ export default function NotFound() {
         That page doesn't exist. If you followed a link from another officer, the
         record may have been renamed or removed.
       </p>
-      <Link to="/sponsors" className="btn btn-primary">
-        Back to sponsors
+      <Link to="/members" className="btn btn-primary">
+        Back to members
       </Link>
     </div>
   );
