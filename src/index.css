@@ -517,13 +517,26 @@
 .card-coral  > .card-head { background: var(--coral); }
 .card-violet > .card-head { background: var(--violet); }
 
-.card-title {
+.card-title,
+.section-title {
   font-family: var(--font);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.13em;
   text-transform: uppercase;
   color: var(--ink);
+}
+
+/* A heading that sits in a card body or between blocks rather than in a card
+   head, so it carries its own space below. */
+.section-title { margin-bottom: 12px; }
+
+/* Two equal columns on a laptop, stacked on a phone. start, not stretch, so the
+   shorter card does not grow a large empty panel. */
+.dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; align-items: start; margin-top: 22px; }
+
+@media (max-width: 800px) {
+  .dash-grid { grid-template-columns: 1fr; }
 }
 
 /* ============================================================================
