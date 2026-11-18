@@ -5,10 +5,7 @@
  */
 export const ORG = {
   legalName: 'ColorStack at Georgia State University',
-  displayName: 'ColorStack at GSU',
-  email: 'official@colorstackatgsu.com',
   billingEmail: 'official@colorstackatgsu.com',
-  site: 'https://colorstackatgsu.com',
   /** Where the people using this portal go when the portal itself is wrong. */
   sponsorPortal: 'https://sponsors.colorstackatgsu.com',
 } as const;

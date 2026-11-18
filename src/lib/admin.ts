@@ -357,11 +357,11 @@ export function invoiceBody(input: {
    ==========================================================================*/
 
 /** `^[a-z0-9]+(-[a-z0-9]+)*$` — the sponsors_slug_format constraint. */
-export const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 /** `^#[0-9A-F]{6}$` — the sponsors_brand_hex_format constraint, case-folded
  *  here because we uppercase before sending. */
-export const HEX_PATTERN = /^#[0-9A-Fa-f]{6}$/;
+const HEX_PATTERN = /^#[0-9A-Fa-f]{6}$/;
 
 /** Turns a company name into a valid slug. Same shape the constraint wants. */
 export function slugify(value: string): string {

@@ -43,7 +43,7 @@ export const EMPTY_EVENT: EventForm = {
 };
 
 /** ISO instant to `yyyy-mm-ddThh:mm` in the browser's own zone, for a datetime-local input. */
-export function toLocalInput(iso: string | null): string {
+function toLocalInput(iso: string | null): string {
   if (!iso) return '';
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return '';
@@ -52,7 +52,7 @@ export function toLocalInput(iso: string | null): string {
 }
 
 /** The reverse. A datetime-local value has no zone, and Date reads it as local time. */
-export function fromLocalInput(value: string): string | null {
+function fromLocalInput(value: string): string | null {
   if (!value) return null;
   const d = new Date(value);
   return Number.isNaN(d.getTime()) ? null : d.toISOString();

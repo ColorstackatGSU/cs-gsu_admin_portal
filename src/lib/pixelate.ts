@@ -30,10 +30,6 @@ type Phase = 'idle' | 'covering' | 'revealing';
  * so the direction has to be known: sweeping portal colours onto the portal on the way
  * back would leave a block of black and neon green as the last thing clearing off a cream
  * page, which is visibly the wrong way round.
- *
- * It is carried rather than inferred from the DOM, because the outbound case
- * (pixelateToUrl, leaving for the Tech League site) has no destination in this document
- * to inspect.
  */
 type Direction = 'to-tech-league' | 'to-portal';
 
@@ -91,28 +87,6 @@ export function pixelateThen(
     publish({ phase: 'revealing', label: null, direction });
     window.setTimeout(() => publish({ phase: 'idle', label: null, direction }), REVEAL_MS);
   }, COVER_MS);
-}
-
-/**
- * The same dissolve, for leaving this app entirely.
- *
- * There is no reveal: the browser unloads this document on navigation, so the overlay
- * simply stays covered until it goes. Trying to reveal afterwards would flash the old page
- * back for a frame on a slow connection.
- */
-export function pixelateToUrl(
-  href: string,
-  label?: string,
-  direction: Direction = 'to-tech-league',
-) {
-  if (prefersReducedMotion()) {
-    window.location.assign(href);
-    return;
-  }
-  if (state.phase !== 'idle') return;
-
-  publish({ phase: 'covering', label: label ?? null, direction });
-  window.setTimeout(() => window.location.assign(href), COVER_MS);
 }
 
 

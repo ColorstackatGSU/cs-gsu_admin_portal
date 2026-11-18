@@ -1,4 +1,4 @@
-import type { ContactRole, InvoiceStatus, SponsorStatus } from './admin';
+import type { InvoiceStatus, SponsorStatus } from './admin';
 
 /**
  * Display helpers. Every amount, date and status label in the UI goes through
@@ -131,16 +131,6 @@ export function sponsorStatusPillClass(status: SponsorStatus): string {
 }
 
 /* ---- Contacts ------------------------------------------------------------- */
-
-const ROLE_LABELS: Record<ContactRole, string> = {
-  primary: 'Primary',
-  billing: 'Billing',
-  viewer: 'Viewer',
-};
-
-export function roleLabel(role: ContactRole): string {
-  return ROLE_LABELS[role];
-}
 
 /** What each role actually means, shown next to the role picker. */
 export const ROLE_HELP =

@@ -50,7 +50,7 @@ const ROUTE_DATA: Record<string, string> = {
 };
 
 /** Begins the GET for `path`, if one is not already in flight. */
-export function warm(path: string): void {
+function warm(path: string): void {
   prune();
   if (waiting.has(path)) return;
 

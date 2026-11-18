@@ -1,6 +1,5 @@
-import type { ContactRole, InvoiceStatus, SponsorStatus } from '../lib/admin';
+import type { InvoiceStatus, SponsorStatus } from '../lib/admin';
 import {
-  roleLabel,
   sponsorStatusLabel,
   sponsorStatusPillClass,
   statusLabel,
@@ -31,9 +30,4 @@ export function ContactPill({ activated }: { activated: boolean }) {
       {activated ? 'Signed in' : 'Invited'}
     </span>
   );
-}
-
-/** Contact role, as a plain chip. Not a status, so no dot. */
-export function RolePill({ role }: { role: ContactRole }) {
-  return <span className="pill pill-invited">{roleLabel(role)}</span>;
 }

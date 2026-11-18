@@ -513,7 +513,6 @@
    label on the section rather than as a mood for the whole page. */
 .card-yellow > .card-head { background: var(--yellow); }
 .card-sky    > .card-head { background: var(--sky); }
-.card-lime   > .card-head { background: var(--lime); }
 .card-mint   > .card-head { background: var(--mint); }
 .card-coral  > .card-head { background: var(--coral); }
 .card-violet > .card-head { background: var(--violet); }
@@ -633,9 +632,6 @@
 
 .btn-secondary { background: var(--paper); }
 .btn-secondary:hover:not(:disabled) { background: var(--yellow); }
-
-.btn-ink { background: var(--ink); color: var(--paper); }
-.btn-ink:hover:not(:disabled) { background: #2a251d; }
 
 .btn-danger { background: var(--paper); color: var(--bad); }
 .btn-danger:hover:not(:disabled) { background: var(--bad-fill); color: var(--ink); }
@@ -787,20 +783,6 @@ select.input:focus {
 .note-warn  { background: var(--warn-bg); color: var(--ink); }
 .note-error { background: var(--bad-bg);  color: var(--ink); }
 .note-ok    { background: var(--ok-bg);   color: var(--ink); }
-
-/* Marks a screen that is not wired up yet. Dashed so it never reads as real UI. */
-.note-preview {
-  border: var(--bw) dashed var(--ink-faint);
-  background: transparent;
-  box-shadow: none;
-  padding: 10px 13px;
-  font-size: 11.5px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  text-align: center;
-}
 
 /* ============================================================================
    STATUS PILLS
@@ -981,7 +963,6 @@ select.input:focus {
 .detail-date { font-family: var(--mono); font-size: 12.5px; font-weight: 700; color: var(--ink-muted); }
 .detail-date-late { color: var(--bad); }
 
-.meta-rule { border: 0; border-top: var(--bw) solid var(--ink); margin: 24px 0 18px; }
 .meta-key { margin: 0 0 4px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--ink-muted); }
 .meta-val { margin: 0 0 16px; font-size: 15px; font-weight: 500; }
 .meta-val:last-of-type { margin-bottom: 0; }
@@ -1120,7 +1101,7 @@ select.input:focus {
 @media print {
   @page { margin: 16mm; }
 
-  .side, .side-top, .scrim, .auth-foot, .no-print, .note-preview { display: none !important; }
+  .side, .side-top, .scrim, .auth-foot { display: none !important; }
 
   .side-main { margin-left: 0 !important; padding: 0 !important; }
   .side-wrap { display: block !important; }
@@ -1877,7 +1858,6 @@ select.input:focus {
 .tl-scope .note,
 .tl-scope .input,
 .tl-scope .side-link,
-.tl-scope .side-help,
 .tl-scope .btn {
   border-radius: var(--radius);
 }
@@ -1917,7 +1897,6 @@ select.input:focus {
 .tl-scope .form-actions,
 .tl-scope .input,
 .tl-scope .logo-row input[type='file']::file-selector-button,
-.tl-scope .meta-rule,
 .tl-scope .note,
 .tl-scope .pill,
 .tl-scope .row-go,
@@ -1927,7 +1906,6 @@ select.input:focus {
 .tl-scope .side-brand img,
 .tl-scope .side-burger,
 .tl-scope .side-count,
-.tl-scope .side-help,
 .tl-scope .side-link,
 .tl-scope .side-top,
 .tl-scope .side-top-brand img,
@@ -2067,20 +2045,6 @@ select.input:focus {
 .tl-scope .btn svg,
 .tl-scope .side-burger svg {
   stroke-width: 1.6;
-}
-
-/* ---- The sticker -----------------------------------------------------------
-   The Sponsor view card is tilted 1.4 degrees, deliberately, as the one thing
-   in the column that is off the grid. That is a paper joke: a sticker stuck on
-   slightly crooked. There is no paper here, so it sits straight. */
-.tl-scope .side-help {
-  background: var(--surface-subtle);
-  border-color: var(--line);
-  transform: none;
-  box-shadow: var(--shadow-sm);
-}
-.tl-scope .side-help-title {
-  color: var(--ink-muted);
 }
 
 /* ---- Type detail -----------------------------------------------------------
